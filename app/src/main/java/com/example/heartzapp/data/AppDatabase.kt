@@ -232,7 +232,7 @@ private suspend fun seedDatabase(database: AppDatabase) {
             nombre = "Juan Pérez",
             correo = "juan.perez@mail.com",
             rol = "Cliente",
-            fechaNacimiento = "1990-05-12"
+            contrasena = "123456"
         )
     )
     usuarioDao.insert(
@@ -241,7 +241,7 @@ private suspend fun seedDatabase(database: AppDatabase) {
             nombre = "María González",
             correo = "maria.gonzalez@mail.com",
             rol = "Empleado",
-            fechaNacimiento = "1985-11-23"
+            contrasena = "123456"
         )
     )
     usuarioDao.insert(
@@ -250,7 +250,7 @@ private suspend fun seedDatabase(database: AppDatabase) {
             nombre = "Pedro Ramírez",
             correo = "pedro.ramirez@mail.com",
             rol = "Cliente",
-            fechaNacimiento = "1992-07-01"
+            contrasena = "123456"
         )
     )
     usuarioDao.insert(
@@ -259,7 +259,7 @@ private suspend fun seedDatabase(database: AppDatabase) {
             nombre = "Ana Torres",
             correo = "ana.torres@mail.com",
             rol = "Empleado",
-            fechaNacimiento = "1988-02-17"
+            contrasena = "123456"
         )
     )
     usuarioDao.insert(
@@ -268,7 +268,7 @@ private suspend fun seedDatabase(database: AppDatabase) {
             nombre = "Luis Fernández",
             correo = "luis.fernandez@mail.com",
             rol = "Cliente",
-            fechaNacimiento = "1995-09-30"
+            contrasena = "123456"
         )
     )
 }
