@@ -32,7 +32,6 @@ fun PantallaLogin(
     var passwordVisible by remember { mutableStateOf(false) }
     val estado by viewModel.estado.collectAsState()
 
-    // Animación de waves
     val infiniteTransition = rememberInfiniteTransition()
     val waveShift by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -48,7 +47,6 @@ fun PantallaLogin(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Canvas para las waves
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
@@ -70,7 +68,7 @@ fun PantallaLogin(
 
             drawPath(
                 path = path,
-                color = Color(0xFFD5B6F2)  // Primera ola
+                color = Color(0xFFD5B6F2)
             )
 
             val path2 = Path().apply {
@@ -90,7 +88,7 @@ fun PantallaLogin(
 
             drawPath(
                 path = path2,
-                color = Color(0xFFFFFFFF) // Segunda ola, más clara
+                color = Color(0xFFFFFFFF)
             )
         }
 
@@ -98,10 +96,9 @@ fun PantallaLogin(
             navController = navController,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp) // separación del borde
+                .padding(16.dp)
         )
 
-        // Contenido de login
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -123,7 +120,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Correo
             OutlinedTextField(
                 value = estado.correo,
                 onValueChange = viewModel::onCorreoChange,
@@ -139,7 +135,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Contraseña
             OutlinedTextField(
                 value = estado.contrasena,
                 onValueChange = viewModel::onContrasenaChange,
@@ -173,10 +168,9 @@ fun PantallaLogin(
                 onClick = {
                     if (estado.correo == "admin@heartz.cl" && estado.contrasena == "123456") {
                         navController.navigate("admin") {
-                            popUpTo("login") { inclusive = true } //
+                            popUpTo("login") { inclusive = true }
                         }
                     } else if (viewModel.validarLogin()) {
-                        // Redirigir a cliente o pantalla normal
                         navController.navigate("inicio") {
                             popUpTo("login") { inclusive = true }
                         }
@@ -197,7 +191,7 @@ fun PantallaLogin(
                 text = "¿No tienes cuenta? ¡Regístrate!",
                 color = Color(0xFF3B006A),
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable { onRegister() }
+                modifier = Modifier.clickable { navController.navigate("registro") }
             )
         }
     }

@@ -3,6 +3,7 @@ package com.example.heartzapp.ui.screens.perfil
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.heartzapp.R
@@ -27,7 +29,6 @@ import com.example.heartzapp.ui.components.BotonVolver
 fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) {
     val estado by viewModel.estado.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    // Animación de waves
     val infiniteTransition = rememberInfiniteTransition()
     val waveShift by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -43,12 +44,10 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Canvas para las waves
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
 
-            // 1 ola
             val path = Path().apply {
                 moveTo(0f, height * 0.8f)
                 val waveHeight = 50f
@@ -65,7 +64,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
             }
             drawPath(path, color = Color(0xFFD5B6F2))
 
-            // 2 ola
             val path2 = Path().apply {
                 moveTo(0f, height * 0.85f)
                 val waveHeight = 35f
@@ -87,10 +85,9 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
             navController = navController,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp) // separación del borde
+                .padding(16.dp)
         )
 
-        // formulario
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -111,7 +108,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Rut
             OutlinedTextField(
                 value = estado.rut,
                 onValueChange = viewModel::onRutChange,
@@ -127,7 +123,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Nombre
             OutlinedTextField(
                 value = estado.nombre,
                 onValueChange = viewModel::onNombreChange,
@@ -143,7 +138,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Correo
             OutlinedTextField(
                 value = estado.correo,
                 onValueChange = viewModel::onCorreoChange,
@@ -159,7 +153,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Contraseña
             var passwordVisible by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = estado.contrasena,
@@ -190,7 +183,6 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Checkbox: aceptar términos
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = estado.aceptaTerminos,
@@ -202,11 +194,10 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón Registrar
             Button(
                 onClick = {
                     if (viewModel.validarFormulario()) {
-                        showDialog = true // Mostrar popup
+                        showDialog = true
                     }
                 },
                 modifier = Modifier
@@ -216,6 +207,15 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
             ) {
                 Text("Registrar")
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "¿Ya tienes cuenta? ¡Inicia Sesión!",
+                color = Color(0xFF3B006A),
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable { navController.navigate("login") }
+            )
 
             if (showDialog) {
                 AlertDialog(
@@ -227,7 +227,7 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
                             onClick = {
                                 showDialog = false
                                 navController.navigate("inicio") {
-                                    popUpTo("login") { inclusive = true } // Evita volver al login/registro
+                                    popUpTo("login") { inclusive = true }
                                 }
                             }
                         ) {
