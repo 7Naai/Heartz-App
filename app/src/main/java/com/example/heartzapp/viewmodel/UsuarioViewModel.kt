@@ -37,9 +37,13 @@ class UsuarioViewModel : ViewModel(){
     fun validarFormulario(): Boolean {
         val estadoActual = _estado.value
         val errores = UsuarioErrores(
-            rut = if (estadoActual.rut.isBlank()) "Campo obligatorio - Ejemplo: " else null,
+            rut = if (estadoActual.rut.isBlank()) "Campo obligatorio"
+            else if (!validarRut(estadoActual.rut)) "RUT inválido (ej: 12345678-9)"
+            else null,
             nombre = if (estadoActual.nombre.isBlank()) "Campo obligatorio" else null,
-            correo = if (!estadoActual.correo.contains("@")) "Correo inválido" else null,
+            correo = if (estadoActual.correo.isBlank()) "Campo obligatorio"
+            else if (!validarCorreo(estadoActual.correo)) "Correo inválido"
+            else null,
             contrasena = if (estadoActual.contrasena.length < 6) "Debe tener al menos 6 caracteres" else null
         )
 
@@ -72,4 +76,18 @@ class UsuarioViewModel : ViewModel(){
 
         return !hayErrores
     }
+
+    // --- FUNCIONES PRIVADAS DE VALIDACIÓN ---
+    private fun validarRut(rut: String): Boolean {
+        // RUT chileno: 7-8 dígitos + guion + dígito verificador (0-9 o K)
+        val regex = Regex("""^\d{7,8}-[\dkK]$""")
+        return regex.matches(rut)
+    }
+
+    private fun validarCorreo(correo: String): Boolean {
+        // Correo válido básico: algo@dominio.com
+        val regex = Regex("""^[\w\.-]+@[\w\.-]+\.\w+$""")
+        return regex.matches(correo)
+    }
+
 }
