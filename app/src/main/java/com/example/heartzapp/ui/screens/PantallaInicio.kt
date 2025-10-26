@@ -31,8 +31,6 @@ import com.example.heartzapp.ui.components.CarruselImagenes
 import com.example.heartzapp.ui.components.TarjetaVinilo
 import com.example.heartzapp.viewmodel.ViniloViewModel
 
-// Color para el encabezado, tomado del diseño del carrito
-val HeaderColor = Color(0xFF2A004E)
 
 @Composable
 fun PantallaInicio(navController: NavHostController) {
@@ -52,14 +50,12 @@ fun PantallaInicio(navController: NavHostController) {
         Pair("Próximo lanzamiento 2", "Próximamente")
     )
 
-    // 1. Implementamos Scaffold para manejar las barras de forma segura
     Scaffold(
-        // 2. TopBar para asegurar que el color oscuro suba a la barra de estado
         topBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(HeaderColor)
+                    .background(Color(0xFF2A004E))
                     .padding(16.dp)
             ) {
                 Text(
@@ -71,22 +67,19 @@ fun PantallaInicio(navController: NavHostController) {
                 )
             }
         },
-        // 3. BottomBar para el menú de navegación inferior
         bottomBar = {
             BottomBar(navController)
         }
-    ) { paddingValues -> // 4. El Scaffold nos da el padding seguro
-        // El contenido principal se coloca en un Box que utiliza el padding seguro del Scaffold
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // APLICAMOS EL PADDING DEL SCAFFOLD AQUÍ
                 .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF7E57C2), // Morado oscuro superior
-                            Color(0xFFF3E5F5)  // Lila claro inferior
+                            Color(0xFF7E57C2),
+                            Color(0xFFF3E5F5)
                         )
                     )
                 )
@@ -142,10 +135,10 @@ fun PantallaInicio(navController: NavHostController) {
                             TarjetaVinilo(
                                 vinilo = vinilo,
                                 onVerDetalle = { viniloSeleccionado ->
-                                    navController.navigate("detalle/${viniloSeleccionado.idVin}")
+                                    navController.navigate("detalle/${viniloSeleccionado.idVin.toString()}")
                                 },
                                 onAgregarCarrito = { viniloSeleccionado ->
-                                    println("Añadir al carrito desde Inicio: ${viniloSeleccionado.nombre}")
+                                    viewModel.agregarViniloACarrito(viniloSeleccionado)
                                 }
                             )
                         }
@@ -168,8 +161,6 @@ fun PantallaInicio(navController: NavHostController) {
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
                         .fillMaxWidth()
-                        // Quitamos el height fijo para que el diseño sea más flexible,
-                        // o lo envolvemos en un peso si es necesario
                         .height(180.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -210,7 +201,6 @@ fun PantallaInicio(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Boton de catalogo
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
@@ -219,11 +209,7 @@ fun PantallaInicio(navController: NavHostController) {
                         Text(text = "Consultar catálogo completo")
                     }
                 }
-
-                // Eliminamos el Spacer(modifier = Modifier.height(16.dp)) final
-                // para que el contenido no intente empujar más allá del BottomBar
             }
-            // 5. ELIMINAMOS EL BOX DEL BOTTOMBAR MANUAL
         }
     }
 }
