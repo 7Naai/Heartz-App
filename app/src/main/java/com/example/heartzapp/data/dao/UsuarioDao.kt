@@ -18,6 +18,9 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE rut = :rut")
     suspend fun getUsuarioByRut(rut: String): Usuario?
 
+    @Query("SELECT * FROM usuarios WHERE correo = :correo")
+    suspend fun getUsuarioByCorreo(correo: String): Usuario?
+
     @Query("DELETE FROM usuarios")
     suspend fun deleteAll()
 }

@@ -17,6 +17,10 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
         return usuarioDao.getUsuarioByRut(rut)
     }
 
+    suspend fun getUsuarioByCorreo(correo: String): Usuario? {
+        return usuarioDao.getUsuarioByCorreo(correo)
+    }
+
     suspend fun deleteAllUsuarios() {
         usuarioDao.deleteAll()
     }
