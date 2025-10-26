@@ -173,7 +173,7 @@ fun PantallaLogin(
                 onClick = {
                     if (estado.correo == "admin@heartz.cl" && estado.contrasena == "123456") {
                         navController.navigate("admin") {
-                            popUpTo("login") { inclusive = true } // Para que no vuelva a login con back
+                            popUpTo("login") { inclusive = true } //
                         }
                     } else if (viewModel.validarLogin()) {
                         // Redirigir a cliente o pantalla normal
