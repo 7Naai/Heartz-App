@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
@@ -21,15 +20,13 @@ import androidx.navigation.NavController
 import com.example.heartzapp.R
 import com.example.heartzapp.viewmodel.UsuarioViewModel
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.unit.sp
 import com.example.heartzapp.ui.components.BotonVolver
 
 @Composable
 fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) {
     val estado by viewModel.estado.collectAsState()
-
+    var showDialog by remember { mutableStateOf(false) }
     // Animación de waves
     val infiniteTransition = rememberInfiniteTransition()
     val waveShift by infiniteTransition.animateFloat(
@@ -209,7 +206,7 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
             Button(
                 onClick = {
                     if (viewModel.validarFormulario()) {
-                        navController.navigate("resumen")
+                        showDialog = true // Mostrar popup
                     }
                 },
                 modifier = Modifier
@@ -218,6 +215,26 @@ fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) 
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Registrar")
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("Registro exitoso") },
+                    text = { Text("Tu cuenta ha sido creada correctamente.") },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDialog = false
+                                navController.navigate("inicio") {
+                                    popUpTo("login") { inclusive = true } // Evita volver al login/registro
+                                }
+                            }
+                        ) {
+                            Text("Aceptar")
+                        }
+                    }
+                )
             }
         }
     }

@@ -38,7 +38,7 @@ fun PantallaPerfil(navController: NavHostController) {
         label = ""
     )
 
-    // 🎨 Gradiente animado en diagonal
+    // Gradiente animado en diagonal
     val animatedBrush = Brush.linearGradient(
         colors = listOf(
             Color(0xFF6A1B9A),
@@ -64,7 +64,7 @@ fun PantallaPerfil(navController: NavHostController) {
         ) {
             Text(
                 text = "Bienvenido a HeartzApp 💜",
-                color = Color.White,
+                color = Color.Gray,
                 fontSize = 26.sp,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 32.dp)
