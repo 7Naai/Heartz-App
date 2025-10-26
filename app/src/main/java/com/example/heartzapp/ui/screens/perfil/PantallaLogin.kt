@@ -16,15 +16,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.heartzapp.R
 
 @Composable
-fun PantallaLogin(
-    onLoginSuccess: (String) -> Unit = {},
-    onForgotPassword: () -> Unit = {},
-    onRegister: () -> Unit = {}
+fun PantallaLogin(navController: NavHostController,
+                  onLoginSuccess: (String) -> Unit = {},
+                  onForgotPassword: () -> Unit = {},
+                  onRegister: () -> Unit = {}
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
@@ -158,8 +158,3 @@ fun PantallaLogin(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PantallaLoginPreview() {
-    PantallaLogin()
-}

@@ -1,9 +1,8 @@
 package com.example.heartzapp.ui.screens.perfil
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +14,7 @@ import androidx.navigation.NavHostController
 import com.example.heartzapp.ui.components.BottomBar
 
 @Composable
-fun PantallaPerfil(navController: NavHostController) {  // ← Añadido parámetro
+fun PantallaPerfil(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -28,10 +27,38 @@ fun PantallaPerfil(navController: NavHostController) {  // ← Añadido parámet
                 )
             )
     ) {
-        Text(
-            text = "perfil",
-            modifier = Modifier.align(Alignment.Center)
-        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "perfil")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón de registro
+            Button(
+                onClick = {
+                    navController.navigate("registro")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Regístrate")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Botón de inicio de sesión
+            Button(
+                onClick = {
+                    navController.navigate("login")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Inicia Sesión")
+            }
+        }
 
         Box(
             modifier = Modifier
