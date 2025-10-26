@@ -54,4 +54,22 @@ class UsuarioViewModel : ViewModel(){
 
         return !hayErrores
     }
+    fun validarLogin(): Boolean {
+        val estadoActual = _estado.value
+        val errores = UsuarioErrores(
+            correo = if (estadoActual.correo.isBlank() || !estadoActual.correo.contains("@"))
+                "Correo inválido" else null,
+            contrasena = if (estadoActual.contrasena.length < 6)
+                "Debe tener al menos 6 caracteres" else null
+        )
+
+        val hayErrores = listOfNotNull(
+            errores.correo,
+            errores.contrasena
+        ).isNotEmpty()
+
+        _estado.update { it.copy(errores = errores) }
+
+        return !hayErrores
+    }
 }

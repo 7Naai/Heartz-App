@@ -30,7 +30,7 @@ fun NavegacionApp() {
         composable("productos") { PantallaProductos(navController) }
         composable("perfil") { PantallaPerfil(navController) }
 
-        composable(route = "login") { PantallaLogin(navController) }
+        composable(route = "login") { PantallaLogin(navController, usuarioViewModel) }
         composable(route = "registro") { PantallaRegistro(navController, usuarioViewModel) }
 
         composable(route = "carrito") { PantallaCarrito(navController) }

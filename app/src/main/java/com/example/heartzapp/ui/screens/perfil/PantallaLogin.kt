@@ -19,21 +19,23 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.heartzapp.R
+import com.example.heartzapp.viewmodel.UsuarioViewModel
 
 @Composable
-fun PantallaLogin(navController: NavHostController,
-                  onLoginSuccess: (String) -> Unit = {},
-                  onForgotPassword: () -> Unit = {},
-                  onRegister: () -> Unit = {}
+fun PantallaLogin(
+    navController: NavHostController,
+    viewModel: UsuarioViewModel,
+    onLoginSuccess: (String) -> Unit = {},
+    onForgotPassword: () -> Unit = {},
+    onRegister: () -> Unit = {}
 ) {
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val estado by viewModel.estado.collectAsState()
 
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFFD5B6F2), // morado claro
-            Color(0xFFFFFFFF)  // blanco
+            Color(0xFFD5B6F2),
+            Color(0xFFFFFFFF)
         )
     )
 
@@ -66,8 +68,8 @@ fun PantallaLogin(navController: NavHostController,
 
             // Correo
             OutlinedTextField(
-                value = correo,
-                onValueChange = { correo = it },
+                value = estado.correo,
+                onValueChange = viewModel::onCorreoChange,
                 label = { Text("Correo") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -78,16 +80,19 @@ fun PantallaLogin(navController: NavHostController,
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
+                isError = estado.errores.correo != null,
+                supportingText = {
+                    estado.errores.correo?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Contraseña
             OutlinedTextField(
-                value = contrasena,
-                onValueChange = { contrasena = it },
+                value = estado.contrasena,
+                onValueChange = viewModel::onContrasenaChange,
                 label = { Text("Contraseña") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -112,12 +117,16 @@ fun PantallaLogin(navController: NavHostController,
                         )
                     }
                 },
+                isError = estado.errores.contrasena != null,
+                supportingText = {
+                    estado.errores.contrasena?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Olvidaste contraseña (alineado derecha)
+            // Olvidaste contraseña
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "¿Olvidaste tu contraseña?",
@@ -134,8 +143,10 @@ fun PantallaLogin(navController: NavHostController,
             // Botón Ingresar
             Button(
                 onClick = {
-                    if (correo.contains("admin")) onLoginSuccess("admin")
-                    else onLoginSuccess("cliente")
+                    if (viewModel.validarLogin()) {
+                        if (estado.correo.contains("admin")) onLoginSuccess("admin")
+                        else onLoginSuccess("cliente")
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,4 +168,3 @@ fun PantallaLogin(navController: NavHostController,
         }
     }
 }
-
