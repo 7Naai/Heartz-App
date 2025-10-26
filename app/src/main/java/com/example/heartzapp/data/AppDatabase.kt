@@ -154,6 +154,6 @@ private suspend fun seedDatabase(database: AppDatabase) {
         Usuario(rut = "44332211-9", nombre = "Ana Torres", correo = "ana.torres@mail.com", rol = "Empleado", contrasena = "123456")
     )
     usuarioDao.insert(
-        Usuario(rut = "55667788-0", nombre = "Luis Fernández", correo = "luis.fernandez@mail.com", rol = "Cliente", contrasena = "123456")
+        Usuario(rut = "55667788-0", nombre = "Luis Fernández", correo = "cliente@heartz.cl", rol = "Cliente", contrasena = "123456")
     )
 }

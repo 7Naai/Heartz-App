@@ -25,7 +25,7 @@ fun NavegacionApp() {
 
     NavHost(
         navController = navController,
-        startDestination = "inicio"
+        startDestination = "login"
     ) {
         composable("inicio") { PantallaInicio(navController) }
         composable("productos") { PantallaProductos(navController) }
