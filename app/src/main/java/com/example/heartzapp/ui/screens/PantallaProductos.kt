@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.heartzapp.ui.components.BottomBar
-import com.example.heartzapp.ui.components.TarjetaVinilo
+import com.example.heartzapp.ui.components.TarjetaVinilo // <-- Asegúrate de tener esta importación
 import com.example.heartzapp.viewmodel.ViniloViewModel
 
 @Composable
@@ -96,12 +96,15 @@ fun PantallaProductos(navController: NavHostController) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(vinilos) { vinilo ->
+                        // Componente TarjetaVinilo integrado
                         TarjetaVinilo(
                             vinilo = vinilo,
                             onVerDetalle = { viniloSeleccionado ->
+                                // TODO: Implementar navegación al detalle, ej: navController.navigate("detalle/${viniloSeleccionado.id}")
                                 println("Ver detalle de: ${viniloSeleccionado.nombre}")
                             },
                             onAgregarCarrito = { viniloSeleccionado ->
+                                // TODO: Implementar lógica de agregar al carrito
                                 println("Añadir al carrito: ${viniloSeleccionado.nombre}")
                             }
                         )
