@@ -1,20 +1,17 @@
 package com.example.heartzapp.ui.screens.perfil
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -23,29 +20,87 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.heartzapp.R
 import com.example.heartzapp.viewmodel.UsuarioViewModel
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.unit.sp
+import com.example.heartzapp.ui.components.BotonVolver
 
 @Composable
 fun PantallaRegistro(navController: NavController, viewModel: UsuarioViewModel) {
     val estado by viewModel.estado.collectAsState()
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFD5B6F2),
-            Color(0xFFFFFFFF)
+
+    // Animación de waves
+    val infiniteTransition = rememberInfiniteTransition()
+    val waveShift by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         )
     )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradient),
-        contentAlignment = Alignment.Center
+            .background(Color.White)
     ) {
+        // Canvas para las waves
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+
+            // 1 ola
+            val path = Path().apply {
+                moveTo(0f, height * 0.8f)
+                val waveHeight = 50f
+                val waveLength = width / 2.5f
+                var x = 0f
+                while (x <= width) {
+                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.8f
+                    lineTo(x, y)
+                    x += 1f
+                }
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+            drawPath(path, color = Color(0xFFD5B6F2))
+
+            // 2 ola
+            val path2 = Path().apply {
+                moveTo(0f, height * 0.85f)
+                val waveHeight = 35f
+                val waveLength = width / 1.5f
+                var x = 0f
+                while (x <= width) {
+                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.85f
+                    lineTo(x, y)
+                    x += 1f
+                }
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+            drawPath(path2, color = Color(0xFFFFFFFF))
+        }
+
+        BotonVolver(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp) // separación del borde
+        )
+
+        // formulario
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .fillMaxWidth()
+                .align(Alignment.Center)
         ) {
-            // Título
             Text(
                 text = "Regístrate",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),

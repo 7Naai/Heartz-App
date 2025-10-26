@@ -1,6 +1,7 @@
 package com.example.heartzapp.ui.screens
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,16 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.heartzapp.R
+import com.example.heartzapp.ui.components.BotonVolver
 import com.example.heartzapp.viewmodel.UsuarioViewModel
 
 @Composable
@@ -32,27 +33,84 @@ fun PantallaLogin(
     var passwordVisible by remember { mutableStateOf(false) }
     val estado by viewModel.estado.collectAsState()
 
-    val gradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFD5B6F2),
-            Color(0xFFFFFFFF)
+    // Animación de waves
+    val infiniteTransition = rememberInfiniteTransition()
+    val waveShift by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 8000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         )
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradient),
-        contentAlignment = Alignment.Center
+            .background(Color.White)
     ) {
+        // Canvas para las waves
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+
+            val path = Path().apply {
+                moveTo(0f, height * 0.8f)
+                val waveHeight = 60f
+                val waveLength = width / 2f
+                var x = 0f
+                while (x <= width) {
+                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.8f
+                    lineTo(x, y)
+                    x += 1f
+                }
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+
+            drawPath(
+                path = path,
+                color = Color(0xFFD5B6F2)  // Primera ola
+            )
+
+            val path2 = Path().apply {
+                moveTo(0f, height * 0.85f)
+                val waveHeight = 40f
+                val waveLength = width / 1.5f
+                var x = 0f
+                while (x <= width) {
+                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.85f
+                    lineTo(x, y)
+                    x += 1f
+                }
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+
+            drawPath(
+                path = path2,
+                color = Color(0xFFFFFFFF) // Segunda ola, más clara
+            )
+        }
+
+        BotonVolver(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp) // separación del borde
+        )
+
+        // Contenido de login
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .fillMaxWidth()
+                .align(Alignment.Center)
         ) {
 
-            // Título
             Text(
                 text = "Bienvenido",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
@@ -73,13 +131,6 @@ fun PantallaLogin(
                 label = { Text("Correo") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.person_icon_login_opsz24),
-                        contentDescription = "Icono usuario",
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
                 isError = estado.errores.correo != null,
                 supportingText = {
                     estado.errores.correo?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -97,26 +148,6 @@ fun PantallaLogin(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.lock_icon_login_opsz24),
-                        contentDescription = "Icono candado",
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingIcon = {
-                    val icon = if (passwordVisible)
-                        R.drawable.visibility_off_icon_login_opsz24
-                    else
-                        R.drawable.visibility_icon_login_opsz24
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Image(
-                            painter = painterResource(id = icon),
-                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
                 isError = estado.errores.contrasena != null,
                 supportingText = {
                     estado.errores.contrasena?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -126,7 +157,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Olvidaste contraseña
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "¿Olvidaste tu contraseña?",
@@ -140,7 +170,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón Ingresar
             Button(
                 onClick = {
                     if (viewModel.validarLogin()) {
@@ -158,7 +187,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Registro
             Text(
                 text = "¿No tienes cuenta? ¡Regístrate!",
                 color = Color(0xFF3B006A),
