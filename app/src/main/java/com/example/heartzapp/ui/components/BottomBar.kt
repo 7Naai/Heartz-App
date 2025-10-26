@@ -17,6 +17,7 @@ fun BottomBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Inicio", "inicio", R.drawable.home_icon_opsz24),
         BottomNavItem("Productos", "productos", R.drawable.local_mall_icon_opsz24),
+        BottomNavItem("Carrito", "carrito", R.drawable.shopping_cart_icon_opsz24),
         BottomNavItem("Perfil", "perfil", R.drawable.account_box_icon_opsz24)
     )
 
@@ -33,7 +34,7 @@ fun BottomBar(navController: NavHostController) {
                     Icon(
                         painter = painterResource(id = item.iconRes),
                         contentDescription = item.title,
-                        modifier = Modifier.size(32.dp) // Tamaño ajustado
+                        modifier = Modifier.size(32.dp)
                     )
                 },
                 label = {
@@ -46,7 +47,18 @@ fun BottomBar(navController: NavHostController) {
                     )
                 },
                 selected = currentRoute == item.route,
-                onClick = { navController.navigate(item.route) },
+                onClick = {
+                    navController.navigate(item.route) {
+                        // Opcional: Evita apilar múltiples copias de la misma pantalla
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        // Evita tener múltiples copias del mismo destino en el stack
+                        launchSingleTop = true
+                        // Restaura el estado cuando se re-selecciona
+                        restoreState = true
+                    }
+                },
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = Color.Transparent
                 )

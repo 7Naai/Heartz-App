@@ -5,19 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.heartzapp.data.dao.ItemCarritoDao
 import com.example.heartzapp.data.dao.ViniloDao
 import com.example.heartzapp.data.dao.UsuarioDao
 import com.example.heartzapp.data.model.Vinilo
 import com.example.heartzapp.data.model.Usuario
+import com.example.heartzapp.data.model.ItemCarrito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-// Si ya lo cambiaste a 3, déjalo en 3. Si sigue sin funcionar, intenta 4.
-@Database(entities = [Vinilo::class, Usuario::class], version = 5)
+@Database(entities = [Vinilo::class, Usuario::class, ItemCarrito::class], version = 7)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun viniloDao(): ViniloDao
     abstract fun usuarioDao(): UsuarioDao
+    abstract fun itemCarritoDao(): ItemCarritoDao
 
     companion object {
         @Volatile
@@ -31,7 +33,6 @@ abstract class AppDatabase : RoomDatabase() {
                     "heartz_db"
                 )
                     .fallbackToDestructiveMigration()
-                    // PASAMOS EL CONTEXTO A LA CLASE DE CALLBACK
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
@@ -40,18 +41,13 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 
-    // CLASE DE CALLBACK MODIFICADA
     private class DatabaseCallback(
-        private val context: Context // Recibimos el contexto
+        private val context: Context
     ) : RoomDatabase.Callback() {
 
-        // El onCreate se dispara cuando la DB se crea por primera vez
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            // Ejecutamos la inserción aquí
             CoroutineScope(Dispatchers.IO).launch {
-                // Obtenemos la instancia DE NUEVO para garantizar que se inicialice
-                // Hacemos un llamado recursivo para obtener la instancia, esta vez será INSTANCE
                 val database = getDatabase(context)
                 seedDatabase(database)
             }
@@ -59,12 +55,10 @@ abstract class AppDatabase : RoomDatabase() {
     }
 }
 
-// LA FUNCIÓN seedDatabase SE MANTIENE EXACTAMENTE IGUAL
 private suspend fun seedDatabase(database: AppDatabase) {
     val viniloDao = database.viniloDao()
     val usuarioDao = database.usuarioDao()
 
-    // --- Inserción de Vinilos ---
     viniloDao.insert(
         Vinilo(
             idVin = 1, nombre = "Saturday Night Wrist", artista = "Deftones", genero = "Metal",
@@ -147,7 +141,6 @@ private suspend fun seedDatabase(database: AppDatabase) {
         )
     )
 
-    // --- Inserción de Usuarios ---
     usuarioDao.insert(
         Usuario(rut = "12345678-5", nombre = "Juan Pérez", correo = "juan.perez@mail.com", rol = "Cliente", contrasena = "123456")
     )

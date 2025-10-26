@@ -1,0 +1,224 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "e89354d07f296ab6cc112daa8b286b6c",
+    "entities": [
+      {
+        "tableName": "vinilos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`idVin` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `artista` TEXT NOT NULL, `genero` TEXT NOT NULL, `anno` INTEGER NOT NULL, `precio` INTEGER NOT NULL, `formato` TEXT NOT NULL, `colorVinilo` TEXT NOT NULL, `stock` INTEGER NOT NULL, `sello` TEXT NOT NULL, `pais` TEXT NOT NULL, `edicion` TEXT NOT NULL, `duracion` TEXT NOT NULL, `descripcion` TEXT NOT NULL, `img` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "idVin",
+            "columnName": "idVin",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "artista",
+            "columnName": "artista",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "genero",
+            "columnName": "genero",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "anno",
+            "columnName": "anno",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precio",
+            "columnName": "precio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "formato",
+            "columnName": "formato",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorVinilo",
+            "columnName": "colorVinilo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stock",
+            "columnName": "stock",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sello",
+            "columnName": "sello",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pais",
+            "columnName": "pais",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edicion",
+            "columnName": "edicion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duracion",
+            "columnName": "duracion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "img",
+            "columnName": "img",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "idVin"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "usuarios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rut` TEXT NOT NULL, `nombre` TEXT NOT NULL, `correo` TEXT NOT NULL, `contrasena` TEXT NOT NULL, `rol` TEXT NOT NULL, PRIMARY KEY(`rut`))",
+        "fields": [
+          {
+            "fieldPath": "rut",
+            "columnName": "rut",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correo",
+            "columnName": "correo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contrasena",
+            "columnName": "contrasena",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rol",
+            "columnName": "rol",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rut"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "carrito",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `viniloId` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `precio` INTEGER NOT NULL, `img` TEXT NOT NULL, `cantidad` INTEGER NOT NULL, FOREIGN KEY(`viniloId`) REFERENCES `vinilos`(`idVin`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "viniloId",
+            "columnName": "viniloId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precio",
+            "columnName": "precio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "img",
+            "columnName": "img",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidad",
+            "columnName": "cantidad",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "vinilos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "viniloId"
+            ],
+            "referencedColumns": [
+              "idVin"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e89354d07f296ab6cc112daa8b286b6c')"
+    ]
+  }
+}

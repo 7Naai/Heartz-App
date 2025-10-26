@@ -23,16 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.heartzapp.data.model.Vinilo // Importar el modelo Vinilo
+import com.example.heartzapp.data.model.Vinilo
 import com.example.heartzapp.ui.components.BottomBar
 import com.example.heartzapp.ui.components.CarruselImagenes
-import com.example.heartzapp.ui.components.TarjetaVinilo // Importar el componente TarjetaVinilo
-import com.example.heartzapp.viewmodel.ViniloViewModel // Importar el ViewModel
+import com.example.heartzapp.ui.components.TarjetaVinilo
+import com.example.heartzapp.viewmodel.ViniloViewModel
 
 @Composable
 fun PantallaInicio(navController: NavHostController) {
     val context = LocalContext.current
-    // Inicialización del ViewModel (ya está correcto)
     val viewModel: ViniloViewModel = viewModel(
         factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(
             context.applicationContext as android.app.Application
@@ -41,10 +40,8 @@ fun PantallaInicio(navController: NavHostController) {
     val vinilos by viewModel.vinilos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    // Tomamos los primeros 4 vinilos como "destacados" si existen
     val productosDestacados = vinilos.take(4)
 
-    // Se mantiene una lista simple para los próximos lanzamientos
     val proximosLanzamientos = listOf(
         Pair("Próximo lanzamiento 1", "Próximamente"),
         Pair("Próximo lanzamiento 2", "Próximamente")
@@ -68,12 +65,10 @@ fun PantallaInicio(navController: NavHostController) {
                 .fillMaxSize()
                 .padding(horizontal = 12.dp)
         ) {
-            // Carrusel
             CarruselImagenes()
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Titulo "productos destacados"
             Text(
                 text = "Productos destacados",
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -84,7 +79,6 @@ fun PantallaInicio(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // SECCIÓN DE PRODUCTOS DESTACADOS
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(300.dp),
@@ -109,21 +103,18 @@ fun PantallaInicio(navController: NavHostController) {
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 300.dp), // Ajuste la altura para el contenido
+                        .heightIn(min = 300.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(productosDestacados) { vinilo ->
-                        // USANDO TarjetaVinilo con el objeto Vinilo real
                         TarjetaVinilo(
                             vinilo = vinilo,
                             onVerDetalle = { viniloSeleccionado ->
-                                // Ejemplo de navegación: debes tener una ruta 'detalle/{id}'
                                 navController.navigate("detalle/${viniloSeleccionado.idVin}")
                             },
                             onAgregarCarrito = { viniloSeleccionado ->
                                 println("Añadir al carrito desde Inicio: ${viniloSeleccionado.nombre}")
-                                // Implementar lógica de agregar al carrito
                             }
                         )
                     }
@@ -132,7 +123,6 @@ fun PantallaInicio(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Seccion de Próximas novedades (mantenida como placeholder simple)
             Text(
                 text = "Próximas novedades",
                 style = MaterialTheme.typography.titleLarge.copy(

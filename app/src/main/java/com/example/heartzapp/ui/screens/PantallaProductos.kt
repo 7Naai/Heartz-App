@@ -15,23 +15,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.heartzapp.ui.components.BottomBar
-import com.example.heartzapp.ui.components.TarjetaVinilo // <-- Asegúrate de tener esta importación
+import com.example.heartzapp.ui.components.TarjetaVinilo
 import com.example.heartzapp.viewmodel.ViniloViewModel
 
 @Composable
 fun PantallaProductos(navController: NavHostController) {
-    val context = LocalContext.current
-    val viewModel: ViniloViewModel = viewModel(
-        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(
-            context.applicationContext as android.app.Application
-        )
-    )
+    val viewModel: ViniloViewModel = viewModel()
 
     val vinilos by viewModel.vinilos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -96,16 +90,14 @@ fun PantallaProductos(navController: NavHostController) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(vinilos) { vinilo ->
-                        // Componente TarjetaVinilo integrado
                         TarjetaVinilo(
                             vinilo = vinilo,
                             onVerDetalle = { viniloSeleccionado ->
-                                // TODO: Implementar navegación al detalle, ej: navController.navigate("detalle/${viniloSeleccionado.id}")
-                                println("Ver detalle de: ${viniloSeleccionado.nombre}")
+                                // Corregido: Navegación directa con la string de ruta.
+                                navController.navigate("details/${viniloSeleccionado.idVin}")
                             },
                             onAgregarCarrito = { viniloSeleccionado ->
-                                // TODO: Implementar lógica de agregar al carrito
-                                println("Añadir al carrito: ${viniloSeleccionado.nombre}")
+                                viewModel.agregarViniloACarrito(viniloSeleccionado)
                             }
                         )
                     }
