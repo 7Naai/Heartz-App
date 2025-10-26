@@ -13,6 +13,7 @@ import com.example.heartzapp.ui.screens.PantallaDetalle // Importación de la pa
 import com.example.heartzapp.ui.screens.PantallaInicio
 import com.example.heartzapp.ui.screens.PantallaLogin
 import com.example.heartzapp.ui.screens.PantallaProductos
+import com.example.heartzapp.ui.screens.perfil.PantallaAdmin
 import com.example.heartzapp.ui.screens.perfil.PantallaPerfil
 import com.example.heartzapp.ui.screens.perfil.PantallaRegistro
 import com.example.heartzapp.viewmodel.UsuarioViewModel
@@ -32,7 +33,8 @@ fun NavegacionApp() {
 
         composable(route = "login") { PantallaLogin(navController, usuarioViewModel) }
         composable(route = "registro") { PantallaRegistro(navController, usuarioViewModel) }
-
+        composable("admin") { PantallaAdmin(navController)
+        }
         composable(route = "carrito") { PantallaCarrito(navController) }
 
         composable(

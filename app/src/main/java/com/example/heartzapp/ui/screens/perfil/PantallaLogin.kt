@@ -26,7 +26,6 @@ import com.example.heartzapp.viewmodel.UsuarioViewModel
 fun PantallaLogin(
     navController: NavHostController,
     viewModel: UsuarioViewModel,
-    onLoginSuccess: (String) -> Unit = {},
     onForgotPassword: () -> Unit = {},
     onRegister: () -> Unit = {}
 ) {
@@ -172,9 +171,15 @@ fun PantallaLogin(
 
             Button(
                 onClick = {
-                    if (viewModel.validarLogin()) {
-                        if (estado.correo.contains("admin")) onLoginSuccess("admin")
-                        else onLoginSuccess("cliente")
+                    if (estado.correo == "admin@heartz.cl" && estado.contrasena == "123456") {
+                        navController.navigate("admin") {
+                            popUpTo("login") { inclusive = true } // Para que no vuelva a login con back
+                        }
+                    } else if (viewModel.validarLogin()) {
+                        // Redirigir a cliente o pantalla normal
+                        navController.navigate("inicio") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                 },
                 modifier = Modifier
@@ -184,6 +189,7 @@ fun PantallaLogin(
             ) {
                 Text("Ingresar")
             }
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
