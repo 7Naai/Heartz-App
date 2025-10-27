@@ -18,11 +18,13 @@ import com.example.heartzapp.ui.screens.PantallaInicio
 import com.example.heartzapp.ui.screens.PantallaLogin
 import com.example.heartzapp.ui.screens.PantallaPago
 import com.example.heartzapp.ui.screens.PantallaProductos
-import com.example.heartzapp.ui.screens.perfil.PantallaAdmin
+import com.example.heartzapp.ui.screens.administrador.PantallaAdmin
+import com.example.heartzapp.ui.screens.administrador.PantallaAdminVinilo
 import com.example.heartzapp.ui.screens.perfil.PantallaPerfil
 import com.example.heartzapp.ui.screens.perfil.PantallaRegistro
 import com.example.heartzapp.viewmodel.UsuarioViewModel
 import com.example.heartzapp.viewmodel.ViniloViewModel
+import com.example.heartzapp.viewmodel.ViniloAdminViewModel
 
 @Composable
 fun NavegacionApp() {
@@ -36,6 +38,12 @@ fun NavegacionApp() {
         )
     )
 
+    val viniloAdminViewModel: ViniloAdminViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(
+            context.applicationContext as Application
+        )
+    )
+
     NavHost(
         navController = navController,
         startDestination = "login"
@@ -44,15 +52,19 @@ fun NavegacionApp() {
         composable("productos") { PantallaProductos(navController) }
         composable("perfil") { PantallaPerfil(navController) }
 
-        composable(route = "login") { PantallaLogin(navController, usuarioViewModel) }
-        composable(route = "registro") { PantallaRegistro(navController, usuarioViewModel) }
-        composable("admin") { PantallaAdmin(navController) }
-        composable(route = "carrito") { PantallaCarrito(navController) }
-        composable(route = "pago") { PantallaPago(navController) }
+        composable("login") { PantallaLogin(navController, usuarioViewModel) }
+        composable("registro") { PantallaRegistro(navController, usuarioViewModel) }
 
-        composable(route = "boleta") {
-            PantallaBoleta(navController, viniloViewModel)
-        }
+        // Pantalla de administración principal
+        composable("admin") { PantallaAdmin(navController) }
+
+        // Pantalla específica de administración de vinilos
+        composable("adminVinilo") { PantallaAdminVinilo(navController, viniloAdminViewModel) }
+
+        composable("carrito") { PantallaCarrito(navController) }
+        composable("pago") { PantallaPago(navController) }
+
+        composable("boleta") { PantallaBoleta(navController, viniloViewModel) }
 
         composable(
             route = "detalle/{idVin}",
