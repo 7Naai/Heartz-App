@@ -108,18 +108,18 @@ fun AdminDrawer(
         Divider(color = Color(0xFF6A1B9A))
 
         NavigationDrawerItem(
-            label = { Text(AdminDrawerItem.Tienda.title) },
+            label = { Text("Cerrar Sesión") },
             icon = {
                 Icon(
-                    painter = painterResource(id = AdminDrawerItem.Tienda.iconRes),
-                    contentDescription = AdminDrawerItem.Tienda.title,
+                    painter = painterResource(id = R.drawable.group_icon_opsz24),
+                    contentDescription = "Cerrar Sesión",
                     modifier = Modifier.size(24.dp)
                 )
             },
             selected = false,
             onClick = {
-                navController.navigate(AdminDrawerItem.Tienda.route) {
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     launchSingleTop = true
                 }
                 closeDrawer()
