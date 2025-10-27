@@ -9,9 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.heartzapp.ui.screens.PantallaCarrito
-import com.example.heartzapp.ui.screens.PantallaDetalle // Importación de la pantalla de detalle
+import com.example.heartzapp.ui.screens.PantallaDetalle
 import com.example.heartzapp.ui.screens.PantallaInicio
 import com.example.heartzapp.ui.screens.PantallaLogin
+import com.example.heartzapp.ui.screens.PantallaPago
 import com.example.heartzapp.ui.screens.PantallaProductos
 import com.example.heartzapp.ui.screens.perfil.PantallaAdmin
 import com.example.heartzapp.ui.screens.perfil.PantallaPerfil
@@ -36,6 +37,7 @@ fun NavegacionApp() {
         composable("admin") { PantallaAdmin(navController)
         }
         composable(route = "carrito") { PantallaCarrito(navController) }
+        composable(route = "pago") {PantallaPago(navController)}
 
         composable(
             route = "detalle/{idVin}",

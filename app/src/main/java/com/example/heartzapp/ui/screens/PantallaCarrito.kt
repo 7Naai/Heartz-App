@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+// Eliminamos la importación de Routes si no la estás usando. Si la necesitas para otros
+// propósitos, mantenla, pero aquí la quitamos para limpiar.
+// import com.example.heartzapp.navigation.Routes
 import com.example.heartzapp.ui.components.BottomBar
 import com.example.heartzapp.ui.components.ItemCarritoCard
 import com.example.heartzapp.viewmodel.ViniloViewModel
@@ -34,17 +37,13 @@ fun PantallaCarrito(navController: NavHostController) {
     val carritoItems by viewModel.carritoItems.collectAsState()
     val carritoTotal by viewModel.carritoTotal.collectAsState()
 
-    // Definición local del color para el encabezado para evitar el conflicto de val global
     val headerColor = Color(0xFF2A004E)
 
-    // Usamos Scaffold para manejar automáticamente el espacio de las barras
     Scaffold(
-        // TopBar para asegurar que el color oscuro suba hasta la barra de estado
         topBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // Usamos el color directamente o la val definida localmente
                     .background(headerColor)
                     .padding(16.dp)
             ) {
@@ -58,14 +57,12 @@ fun PantallaCarrito(navController: NavHostController) {
             }
         },
         bottomBar = {
-            // Colocamos el BottomBar en el slot 'bottomBar' del Scaffold
             BottomBar(navController)
         }
-    ) { paddingValues -> // El Scaffold nos da el padding seguro
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // Aplicamos el padding que deja el espacio para la TopBar y BottomBar
                 .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
@@ -80,8 +77,6 @@ fun PantallaCarrito(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                // El contenido principal de la pantalla
-
                 if (carritoItems.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -111,7 +106,7 @@ fun PantallaCarrito(navController: NavHostController) {
                         }
                     }
 
-                    // Resumen del Carrito y Botón de Pagar (Ahora visible)
+                    // Resumen del Carrito y Botón de Pagar
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -146,8 +141,8 @@ fun PantallaCarrito(navController: NavHostController) {
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = {
-                                    println("Proceder al pago. Total: $carritoTotal")
-                                    viewModel.vaciarCarrito()
+                                    // *** REDIRECCIÓN A LA PANTALLA DE PAGO, USANDO LA RUTA LITERAL "pago" ***
+                                    navController.navigate("pago")
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
