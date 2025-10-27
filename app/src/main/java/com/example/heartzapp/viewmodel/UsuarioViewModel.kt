@@ -1,17 +1,38 @@
 package com.example.heartzapp.viewmodel
 
-
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.heartzapp.data.model.Usuario
 import com.example.heartzapp.data.model.UsuarioErrores
 import com.example.heartzapp.data.model.UsuarioUiState
+import com.example.heartzapp.data.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class UsuarioViewModel : ViewModel(){
-    private val _estado = MutableStateFlow(value = UsuarioUiState())
+class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() {
+
+    // --- Estado del formulario ---
+    private val _estado = MutableStateFlow(UsuarioUiState())
     val estado: StateFlow<UsuarioUiState> = _estado
 
+    // --- Lista de usuarios ---
+    private val _usuarios = MutableStateFlow<List<Usuario>>(emptyList())
+    val usuarios: StateFlow<List<Usuario>> = _usuarios
+
+    init {
+        cargarUsuarios()
+    }
+
+    private fun cargarUsuarios() {
+        viewModelScope.launch {
+            val lista = repository.getAllUsuarios() // Recupera la lista real de la BDD
+            _usuarios.value = lista
+        }
+    }
+
+    // --- Funciones para actualizar campos del formulario ---
     fun onRutChange(valor: String) {
         _estado.update { it.copy(rut = valor, errores = it.errores.copy(rut = null)) }
     }
@@ -20,7 +41,6 @@ class UsuarioViewModel : ViewModel(){
         _estado.update { it.copy(nombre = valor, errores = it.errores.copy(nombre = null)) }
     }
 
-    // Actualiza el campo correo
     fun onCorreoChange(valor: String) {
         _estado.update { it.copy(correo = valor, errores = it.errores.copy(correo = null)) }
     }
@@ -29,11 +49,11 @@ class UsuarioViewModel : ViewModel(){
         _estado.update { it.copy(contrasena = valor, errores = it.errores.copy(contrasena = null)) }
     }
 
-    // Actualiza checkbox de aceptación
     fun onAceptarTerminosChange(valor: Boolean) {
         _estado.update { it.copy(aceptaTerminos = valor) }
     }
 
+    // --- Validaciones ---
     fun validarFormulario(): Boolean {
         val estadoActual = _estado.value
         val errores = UsuarioErrores(
@@ -46,18 +66,16 @@ class UsuarioViewModel : ViewModel(){
             else null,
             contrasena = if (estadoActual.contrasena.length < 6) "Debe tener al menos 6 caracteres" else null
         )
-
         val hayErrores = listOfNotNull(
             errores.rut,
             errores.nombre,
             errores.correo,
-            errores.contrasena,
+            errores.contrasena
         ).isNotEmpty()
-
         _estado.update { it.copy(errores = errores) }
-
         return !hayErrores
     }
+
     fun validarLogin(): Boolean {
         val estadoActual = _estado.value
         val errores = UsuarioErrores(
@@ -66,28 +84,22 @@ class UsuarioViewModel : ViewModel(){
             contrasena = if (estadoActual.contrasena.length < 6)
                 "Debe tener al menos 6 caracteres" else null
         )
-
         val hayErrores = listOfNotNull(
             errores.correo,
             errores.contrasena
         ).isNotEmpty()
-
         _estado.update { it.copy(errores = errores) }
-
         return !hayErrores
     }
 
-    // --- FUNCIONES PRIVADAS DE VALIDACIÓN ---
+    // --- Validaciones privadas ---
     private fun validarRut(rut: String): Boolean {
-        // RUT chileno: 7-8 dígitos + guion + dígito verificador (0-9 o K)
         val regex = Regex("""^\d{7,8}-[\dkK]$""")
         return regex.matches(rut)
     }
 
     private fun validarCorreo(correo: String): Boolean {
-        // Correo válido básico: algo@dominio.com
         val regex = Regex("""^[\w\.-]+@[\w\.-]+\.\w+$""")
         return regex.matches(correo)
     }
-
 }

@@ -11,6 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.heartzapp.data.AppDatabase
+import com.example.heartzapp.data.repository.UsuarioRepository
 import com.example.heartzapp.ui.screens.PantallaBoleta
 import com.example.heartzapp.ui.screens.PantallaCarrito
 import com.example.heartzapp.ui.screens.PantallaDetalle
@@ -19,19 +21,28 @@ import com.example.heartzapp.ui.screens.PantallaLogin
 import com.example.heartzapp.ui.screens.PantallaPago
 import com.example.heartzapp.ui.screens.PantallaProductos
 import com.example.heartzapp.ui.screens.administrador.PantallaAdmin
+import com.example.heartzapp.ui.screens.administrador.PantallaAdminUsuarios
 import com.example.heartzapp.ui.screens.administrador.PantallaAdminVinilo
 import com.example.heartzapp.ui.screens.perfil.PantallaPerfil
 import com.example.heartzapp.ui.screens.perfil.PantallaRegistro
 import com.example.heartzapp.viewmodel.UsuarioViewModel
+import com.example.heartzapp.viewmodel.UsuarioViewModelFactory
 import com.example.heartzapp.viewmodel.ViniloViewModel
 import com.example.heartzapp.viewmodel.ViniloAdminViewModel
 
 @Composable
 fun NavegacionApp() {
     val navController: NavHostController = rememberNavController()
-    val usuarioViewModel: UsuarioViewModel = viewModel()
-
     val context = LocalContext.current
+
+    // --- Configurar repositorio y factory para UsuarioViewModel ---
+    val db = AppDatabase.getInstance(context)
+    val usuarioRepository = UsuarioRepository(db.usuarioDao())
+    val usuarioViewModel: UsuarioViewModel = viewModel(
+        factory = UsuarioViewModelFactory(usuarioRepository)
+    )
+
+    // --- ViniloViewModel con AndroidViewModelFactory ---
     val viniloViewModel: ViniloViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(
             context.applicationContext as Application
@@ -44,6 +55,7 @@ fun NavegacionApp() {
         )
     )
 
+    // --- NavHost ---
     NavHost(
         navController = navController,
         startDestination = "login"
@@ -55,15 +67,12 @@ fun NavegacionApp() {
         composable("login") { PantallaLogin(navController, usuarioViewModel) }
         composable("registro") { PantallaRegistro(navController, usuarioViewModel) }
 
-        // Pantalla de administración principal
         composable("admin") { PantallaAdmin(navController) }
-
-        // Pantalla específica de administración de vinilos
         composable("adminVinilo") { PantallaAdminVinilo(navController, viniloAdminViewModel) }
+        composable("adminUsuario") { PantallaAdminUsuarios(navController, usuarioViewModel) }
 
         composable("carrito") { PantallaCarrito(navController) }
         composable("pago") { PantallaPago(navController) }
-
         composable("boleta") { PantallaBoleta(navController, viniloViewModel) }
 
         composable(

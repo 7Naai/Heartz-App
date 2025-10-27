@@ -26,7 +26,7 @@ import com.example.heartzapp.R
 sealed class AdminDrawerItem(val route: String, val title: String, val iconRes: Int) {
     data object Tienda : AdminDrawerItem("inicio", "Volver a la Tienda", R.drawable.local_mall_icon_opsz24)
     data object Vinilos : AdminDrawerItem("adminVinilo", "Gestión de Vinilos", R.drawable.album_icon_opsz24)
-    data object Usuarios : AdminDrawerItem("adminUsuarios", "Gestión de Usuarios", R.drawable.group_icon_opsz24)
+    data object Usuarios : AdminDrawerItem("adminUsuario", "Gestión de Usuarios", R.drawable.group_icon_opsz24)
 }
 
 @Composable
