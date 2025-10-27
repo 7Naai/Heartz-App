@@ -59,7 +59,7 @@ fun PantallaInicio(navController: NavHostController) {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Inicio - HeartZApp",
+                    text = "HeartzApp",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -156,48 +156,6 @@ fun PantallaInicio(navController: NavHostController) {
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(proximosLanzamientos) { producto ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF2A004E))
-                                .padding(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFF6A1B9A)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("💿", fontSize = MaterialTheme.typography.titleLarge.fontSize)
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = producto.first, // Nombre
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = producto.second, // Próximamente
-                                color = Color(0xFF9C27B0),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
