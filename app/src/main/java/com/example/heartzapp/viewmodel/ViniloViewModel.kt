@@ -3,10 +3,9 @@ package com.example.heartzapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.heartzapp.data.AppDatabase
+import com.example.heartzapp.data.api.RepositorioVinilosApi
 import com.example.heartzapp.data.model.ItemCarrito
 import com.example.heartzapp.data.model.Vinilo
-import com.example.heartzapp.data.repository.ViniloRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -16,16 +15,17 @@ import kotlinx.coroutines.launch
 
 class ViniloViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: ViniloRepository
+    // --- Nuevo repositorio basado en API ---
+    private val apiRepository = RepositorioVinilosApi()
 
-    // --- Vinilos ---
+    // --- Vinilos (desde API) ---
     private val _vinilos = MutableStateFlow<List<Vinilo>>(emptyList())
     val vinilos: StateFlow<List<Vinilo>> = _vinilos
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    // --- Carrito ---
+    // --- Carrito (temporal en memoria, igual que Room antes) ---
     private val _carritoItems = MutableStateFlow<List<ItemCarrito>>(emptyList())
     val carritoItems: StateFlow<List<ItemCarrito>> = _carritoItems
 
@@ -34,26 +34,24 @@ class ViniloViewModel(application: Application) : AndroidViewModel(application) 
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init {
-        val database = AppDatabase.getDatabase(application)
-        val viniloDao = database.viniloDao()
-        val itemCarritoDao = database.itemCarritoDao()
-
-        repository = ViniloRepository(viniloDao, itemCarritoDao)
-
         cargarVinilos()
-
-        viewModelScope.launch {
-            repository.getCarritoItems().collect { items ->
-                _carritoItems.value = items
-            }
-        }
     }
 
+    // -----------------------------------------------------------
+    // -------------------   VINILOS (API)   ----------------------
+    // -----------------------------------------------------------
     private fun cargarVinilos() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _vinilos.value = repository.getAllVinilos()
-            _isLoading.value = false
+            try {
+                _isLoading.value = true
+                val lista = apiRepository.obtenerVinilos()
+                _vinilos.value = lista
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _vinilos.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
@@ -61,34 +59,64 @@ class ViniloViewModel(application: Application) : AndroidViewModel(application) 
         return _vinilos.value.find { it.idVin == id }
     }
 
-    // --- Funciones de Carrito ---
+    // -----------------------------------------------------------
+    // -------------------   CARRITO (MEMORIA)   ------------------
+    // -----------------------------------------------------------
     fun agregarViniloACarrito(vinilo: Vinilo) {
         viewModelScope.launch {
-            repository.addItemToCarrito(vinilo)
+            val items = _carritoItems.value.toMutableList()
+            val existente = items.find { it.viniloId == vinilo.idVin }
+
+            if (existente != null) {
+                val actualizado = existente.copy(cantidad = existente.cantidad + 1)
+                items[items.indexOf(existente)] = actualizado
+            } else {
+                items.add(
+                    ItemCarrito(
+                        id = 0, // no usamos Room ahora
+                        viniloId = vinilo.idVin,
+                        nombre = vinilo.nombre,
+                        precio = vinilo.precio,
+                        img = vinilo.img,
+                        cantidad = 1
+                    )
+                )
+            }
+
+            _carritoItems.value = items
         }
     }
 
     fun incrementarItem(item: ItemCarrito) {
         viewModelScope.launch {
-            val updatedItem = item.copy(cantidad = item.cantidad + 1)
-            repository.updateItemCarrito(updatedItem)
+            val items = _carritoItems.value.toMutableList()
+            val index = items.indexOf(item)
+            if (index != -1) {
+                items[index] = item.copy(cantidad = item.cantidad + 1)
+            }
+            _carritoItems.value = items
         }
     }
 
     fun decrementarItem(item: ItemCarrito) {
         viewModelScope.launch {
-            if (item.cantidad > 1) {
-                val updatedItem = item.copy(cantidad = item.cantidad - 1)
-                repository.updateItemCarrito(updatedItem)
-            } else {
-                repository.deleteItemCarrito(item)
+            val items = _carritoItems.value.toMutableList()
+            val index = items.indexOf(item)
+
+            if (index != -1) {
+                if (item.cantidad > 1) {
+                    items[index] = item.copy(cantidad = item.cantidad - 1)
+                } else {
+                    items.removeAt(index)
+                }
             }
+            _carritoItems.value = items
         }
     }
 
     fun vaciarCarrito() {
         viewModelScope.launch {
-            repository.clearCarrito()
+            _carritoItems.value = emptyList()
         }
     }
 }

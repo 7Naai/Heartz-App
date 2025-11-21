@@ -1,23 +1,39 @@
 package com.example.heartzapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.heartzapp.data.api.RepositorioUsuarioApi
 import com.example.heartzapp.data.model.Usuario
-import com.example.heartzapp.data.model.UsuarioErrores
-import com.example.heartzapp.data.model.UsuarioUiState
-import com.example.heartzapp.data.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() {
+class UsuarioViewModel(
+    private val repository: RepositorioUsuarioApi
+) : ViewModel() {
 
-    // --- Estado del formulario ---
-    private val _estado = MutableStateFlow(UsuarioUiState())
-    val estado: StateFlow<UsuarioUiState> = _estado
+    // ------------------ CAMPOS DEL FORMULARIO ------------------
+    private val _rut = MutableStateFlow("")
+    val rut: StateFlow<String> = _rut
 
-    // --- Lista de usuarios ---
+    private val _nombre = MutableStateFlow("")
+    val nombre: StateFlow<String> = _nombre
+
+    private val _correo = MutableStateFlow("")
+    val correo: StateFlow<String> = _correo
+
+    private val _contrasena = MutableStateFlow("")
+    val contrasena: StateFlow<String> = _contrasena
+
+    private val _aceptaTerminos = MutableStateFlow(false)
+    val aceptaTerminos: StateFlow<Boolean> = _aceptaTerminos
+
+    // ------------------ ERRORES SIMPLES ------------------
+    private val _errorMensaje = MutableStateFlow<String?>(null)
+    val errorMensaje: StateFlow<String?> = _errorMensaje
+
+    // ------------------ LISTA DE USUARIOS ------------------
     private val _usuarios = MutableStateFlow<List<Usuario>>(emptyList())
     val usuarios: StateFlow<List<Usuario>> = _usuarios
 
@@ -25,81 +41,108 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
         cargarUsuarios()
     }
 
-    private fun cargarUsuarios() {
+    fun cargarUsuarios() {
         viewModelScope.launch {
-            val lista = repository.getAllUsuarios() // Recupera la lista real de la BDD
-            _usuarios.value = lista
+            try {
+                _usuarios.value = repository.obtenerUsuarios()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    // --- Funciones para actualizar campos del formulario ---
-    fun onRutChange(valor: String) {
-        _estado.update { it.copy(rut = valor, errores = it.errores.copy(rut = null)) }
-    }
+    // ------------------ SETTERS ------------------
+    fun onRutChange(v: String) { _rut.value = v }
+    fun onNombreChange(v: String) { _nombre.value = v }
+    fun onCorreoChange(v: String) { _correo.value = v }
+    fun onContrasenaChange(v: String) { _contrasena.value = v }
+    fun onAceptarTerminosChange(v: Boolean) { _aceptaTerminos.value = v }
 
-    fun onNombreChange(valor: String) {
-        _estado.update { it.copy(nombre = valor, errores = it.errores.copy(nombre = null)) }
-    }
-
-    fun onCorreoChange(valor: String) {
-        _estado.update { it.copy(correo = valor, errores = it.errores.copy(correo = null)) }
-    }
-
-    fun onContrasenaChange(valor: String) {
-        _estado.update { it.copy(contrasena = valor, errores = it.errores.copy(contrasena = null)) }
-    }
-
-    fun onAceptarTerminosChange(valor: Boolean) {
-        _estado.update { it.copy(aceptaTerminos = valor) }
-    }
-
-    // --- Validaciones ---
-    fun validarFormulario(): Boolean {
-        val estadoActual = _estado.value
-        val errores = UsuarioErrores(
-            rut = if (estadoActual.rut.isBlank()) "Campo obligatorio"
-            else if (!validarRut(estadoActual.rut)) "RUT inválido (ej: 12345678-9)"
-            else null,
-            nombre = if (estadoActual.nombre.isBlank()) "Campo obligatorio" else null,
-            correo = if (estadoActual.correo.isBlank()) "Campo obligatorio"
-            else if (!validarCorreo(estadoActual.correo)) "Correo inválido"
-            else null,
-            contrasena = if (estadoActual.contrasena.length < 6) "Debe tener al menos 6 caracteres" else null
-        )
-        val hayErrores = listOfNotNull(
-            errores.rut,
-            errores.nombre,
-            errores.correo,
-            errores.contrasena
-        ).isNotEmpty()
-        _estado.update { it.copy(errores = errores) }
-        return !hayErrores
-    }
-
+    // ------------------ VALIDACIONES ------------------
     fun validarLogin(): Boolean {
-        val estadoActual = _estado.value
-        val errores = UsuarioErrores(
-            correo = if (estadoActual.correo.isBlank() || !estadoActual.correo.contains("@"))
-                "Correo inválido" else null,
-            contrasena = if (estadoActual.contrasena.length < 6)
-                "Debe tener al menos 6 caracteres" else null
+        if (_correo.value.isBlank() || !_correo.value.contains("@")) {
+            _errorMensaje.value = "Correo inválido"
+            return false
+        }
+        if (_contrasena.value.length < 6) {
+            _errorMensaje.value = "La contraseña debe tener mínimo 6 caracteres"
+            return false
+        }
+        _errorMensaje.value = null
+        return true
+    }
+
+    fun validarRegistro(): Boolean {
+        if (_rut.value.isBlank()) {
+            _errorMensaje.value = "El RUT no puede estar vacío"
+            return false
+        }
+        if (_nombre.value.isBlank()) {
+            _errorMensaje.value = "El nombre es obligatorio"
+            return false
+        }
+        if (!_correo.value.contains("@")) {
+            _errorMensaje.value = "Correo inválido"
+            return false
+        }
+        if (_contrasena.value.length < 6) {
+            _errorMensaje.value = "La contraseña debe tener al menos 6 caracteres"
+            return false
+        }
+        if (!_aceptaTerminos.value) {
+            _errorMensaje.value = "Debes aceptar los términos"
+            return false
+        }
+        _errorMensaje.value = null
+        return true
+    }
+
+    // ------------------ LOGIN API ------------------
+    suspend fun login(): Usuario? {
+        return try {
+            val lista = repository.obtenerUsuarios()
+
+            val correoIngresado = _correo.value.trim()
+            val passIngresada = _contrasena.value.trim()
+
+            lista.find { u ->
+                u.correo.trim().equals(correoIngresado, ignoreCase = true) &&
+                        u.contrasena.trim() == passIngresada
+            }
+
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
+
+
+
+
+
+    // ------------------ REGISTRO API ------------------
+    suspend fun registrar(): Boolean {
+        val nuevo = Usuario(
+            rut = _rut.value,
+            nombre = _nombre.value,
+            correo = _correo.value,
+            contrasena = _contrasena.value,
+            rol = "Cliente"
         )
-        val hayErrores = listOfNotNull(
-            errores.correo,
-            errores.contrasena
-        ).isNotEmpty()
-        _estado.update { it.copy(errores = errores) }
-        return !hayErrores
+
+        return try {
+            repository.crearUsuario(nuevo)
+            cargarUsuarios()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 
-    // --- Validaciones privadas ---
-    private fun validarRut(rut: String): Boolean {
-        val regex = Regex("""^\d{7,8}-[\dkK]$""")
-        return regex.matches(rut)
+    fun setError(msg: String) {
+        _errorMensaje.value = msg
     }
 
-    private fun validarCorreo(correo: String): Boolean {
-        val regex = Regex("""^[\w\.-]+@[\w\.-]+\.\w+$""")
-        return regex.matches(correo)
-    }
 }

@@ -3,17 +3,16 @@ package com.example.heartzapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.heartzapp.data.AppDatabase
+import com.example.heartzapp.data.api.RepositorioVinilosApi
 import com.example.heartzapp.data.model.Vinilo
-import com.example.heartzapp.data.repository.ViniloRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Estado inicial de un Vinilo que COINCIDE con el constructor de Vinilo.kt (15 propiedades).
+// Estado inicial que coincide con el modelo Vinilo.kt
 val EMPTY_VINILO = Vinilo(
-    idVin = 0, // 0 indica nuevo elemento
+    idVin = 0,
     nombre = "",
     artista = "",
     genero = "",
@@ -32,74 +31,89 @@ val EMPTY_VINILO = Vinilo(
 
 class ViniloAdminViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: ViniloRepository
+    // --- Nuevo repositorio con Retrofit ---
+    private val apiRepository = RepositorioVinilosApi()
 
-    // --- Estado de la Lista de Vinilos ---
+    // --- Lista completa de vinilos ---
     private val _vinilos = MutableStateFlow<List<Vinilo>>(emptyList())
     val vinilos: StateFlow<List<Vinilo>> = _vinilos
 
-    // --- Estado del Vinilo Seleccionado (para editar o crear) ---
-    private val _selectedVinilo = MutableStateFlow<Vinilo>(EMPTY_VINILO)
+    // --- Vinilo seleccionado para editar/crear ---
+    private val _selectedVinilo = MutableStateFlow(EMPTY_VINILO)
     val selectedVinilo: StateFlow<Vinilo> = _selectedVinilo
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
-        // Inicializar la base de datos y el repositorio
-        val database = AppDatabase.getDatabase(application)
-        val viniloDao = database.viniloDao()
-        val itemCarritoDao = database.itemCarritoDao()
-
-        repository = ViniloRepository(viniloDao, itemCarritoDao)
-
         loadVinilos()
     }
 
+    // -----------------------------------------------------------
+    // ---------------------   VINILOS API   ----------------------
+    // -----------------------------------------------------------
+
     fun loadVinilos() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _vinilos.update { repository.getAllVinilos() }
-            _isLoading.value = false
+            try {
+                _isLoading.value = true
+                val lista = apiRepository.obtenerVinilos()
+                _vinilos.value = lista
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _vinilos.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
     /**
-     * Establece el Vinilo a editar o un Vinilo vacío para crear.
+     * Selecciona un vinilo para edición o un vacío para crear uno nuevo.
      */
     fun selectVinilo(vinilo: Vinilo?) {
         _selectedVinilo.update { vinilo ?: EMPTY_VINILO }
     }
 
     /**
-     * Guarda o actualiza un Vinilo en la base de datos.
+     * Guarda o actualiza un vinilo mediante la API.
      */
     fun saveVinilo(vinilo: Vinilo) {
         viewModelScope.launch {
-            if (vinilo.idVin == 0) {
-                // Crear nuevo: insertamos.
-                repository.insertVinilo(vinilo.copy(idVin = 0))
-            } else {
-                // Actualizar existente: actualizamos.
-                repository.updateVinilo(vinilo)
+            try {
+                if (vinilo.idVin == 0) {
+                    apiRepository.crearVinilo(vinilo.copy(idVin = 0))
+                } else {
+                    apiRepository.actualizarVinilo(vinilo.idVin, vinilo)
+                }
+                loadVinilos()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                selectVinilo(null)
             }
-            loadVinilos() // Recargar la lista después de la operación
-            selectVinilo(null) // Limpiar el formulario
         }
     }
 
     /**
-     * Elimina un Vinilo de la base de datos.
+     * Elimina un vinilo mediante la API.
      */
     fun deleteVinilo(vinilo: Vinilo) {
         viewModelScope.launch {
-            repository.deleteVinilo(vinilo)
-            loadVinilos() // Recargar la lista después de la eliminación
-            selectVinilo(null) // Limpiar el formulario
+            try {
+                apiRepository.eliminarVinilo(vinilo.idVin)
+                loadVinilos()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                selectVinilo(null)
+            }
         }
     }
 
-    // Funciones para actualizar el estado del formulario en tiempo real
+    /**
+     * Actualiza el estado interno del formulario.
+     */
     fun updateViniloState(vinilo: Vinilo) {
         _selectedVinilo.value = vinilo
     }

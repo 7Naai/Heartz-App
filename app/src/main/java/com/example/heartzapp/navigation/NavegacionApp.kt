@@ -11,8 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.heartzapp.data.AppDatabase
-import com.example.heartzapp.data.repository.UsuarioRepository
 import com.example.heartzapp.ui.screens.PantallaBoleta
 import com.example.heartzapp.ui.screens.PantallaCarrito
 import com.example.heartzapp.ui.screens.PantallaDetalle
@@ -35,27 +33,34 @@ fun NavegacionApp() {
     val navController: NavHostController = rememberNavController()
     val context = LocalContext.current
 
-    // --- Configurar repositorio y factory para UsuarioViewModel ---
-    val db = AppDatabase.getInstance(context)
-    val usuarioRepository = UsuarioRepository(db.usuarioDao())
+    // --------------------------------------------------------
+    // USUARIO VIEWMODEL → ahora también debe ser API (NO Room)
+    // --------------------------------------------------------
     val usuarioViewModel: UsuarioViewModel = viewModel(
-        factory = UsuarioViewModelFactory(usuarioRepository)
+        factory = UsuarioViewModelFactory()
     )
 
-    // --- ViniloViewModel con AndroidViewModelFactory ---
+    // --------------------------------------------------------
+    // VINILO VIEWMODEL (usa API)
+    // --------------------------------------------------------
     val viniloViewModel: ViniloViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(
             context.applicationContext as Application
         )
     )
 
+    // --------------------------------------------------------
+    // VINILO ADMIN VIEWMODEL (usa API)
+    // --------------------------------------------------------
     val viniloAdminViewModel: ViniloAdminViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(
             context.applicationContext as Application
         )
     )
 
-    // --- NavHost ---
+    // --------------------------------------------------------
+    // NAVHOST (sin cambios)
+    // --------------------------------------------------------
     NavHost(
         navController = navController,
         startDestination = "login"

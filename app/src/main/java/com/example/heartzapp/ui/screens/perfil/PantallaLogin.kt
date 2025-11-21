@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.heartzapp.ui.components.BotonVolver
 import com.example.heartzapp.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaLogin(
@@ -29,8 +29,13 @@ fun PantallaLogin(
     onForgotPassword: () -> Unit = {},
     onRegister: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
+
     var passwordVisible by remember { mutableStateOf(false) }
-    val estado by viewModel.estado.collectAsState()
+
+    val correo by viewModel.correo.collectAsState()
+    val contrasena by viewModel.contrasena.collectAsState()
+    val errorMensaje by viewModel.errorMensaje.collectAsState()
 
     val infiniteTransition = rememberInfiniteTransition()
     val waveShift by infiniteTransition.animateFloat(
@@ -47,6 +52,7 @@ fun PantallaLogin(
             .fillMaxSize()
             .background(Color.White)
     ) {
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
@@ -57,7 +63,9 @@ fun PantallaLogin(
                 val waveLength = width / 2f
                 var x = 0f
                 while (x <= width) {
-                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.8f
+                    val y = waveHeight *
+                            kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) +
+                            height * 0.8f
                     lineTo(x, y)
                     x += 1f
                 }
@@ -65,31 +73,7 @@ fun PantallaLogin(
                 lineTo(0f, height)
                 close()
             }
-
-            drawPath(
-                path = path,
-                color = Color(0xFFD5B6F2)
-            )
-
-            val path2 = Path().apply {
-                moveTo(0f, height * 0.85f)
-                val waveHeight = 40f
-                val waveLength = width / 1.5f
-                var x = 0f
-                while (x <= width) {
-                    val y = waveHeight * kotlin.math.sin((x / waveLength + waveShift * 2 * Math.PI).toFloat()) + height * 0.85f
-                    lineTo(x, y)
-                    x += 1f
-                }
-                lineTo(width, height)
-                lineTo(0f, height)
-                close()
-            }
-
-            drawPath(
-                path = path2,
-                color = Color(0xFFFFFFFF)
-            )
+            drawPath(path, color = Color(0xFFD5B6F2))
         }
 
         BotonVolver(
@@ -117,48 +101,37 @@ fun PantallaLogin(
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF3B006A)
             )
-
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = estado.correo,
+                value = correo,
                 onValueChange = viewModel::onCorreoChange,
                 label = { Text("Correo") },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                isError = estado.errores.correo != null,
-                supportingText = {
-                    estado.errores.correo?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                },
+                isError = !errorMensaje.isNullOrEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = estado.contrasena,
+                value = contrasena,
                 onValueChange = viewModel::onContrasenaChange,
                 label = { Text("Contraseña") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                isError = estado.errores.contrasena != null,
-                supportingText = {
-                    estado.errores.contrasena?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                },
+                visualTransformation =
+                    if (passwordVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                isError = !errorMensaje.isNullOrEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Box(modifier = Modifier.fillMaxWidth()) {
+            if (!errorMensaje.isNullOrEmpty()) {
                 Text(
-                    text = "¿Olvidaste tu contraseña?",
-                    color = Color(0xFF3B006A),
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .clickable { onForgotPassword() }
+                    text = errorMensaje ?: "",
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 6.dp)
                 )
             }
 
@@ -166,13 +139,23 @@ fun PantallaLogin(
 
             Button(
                 onClick = {
-                    if (estado.correo == "admin@heartz.cl" && estado.contrasena == "123456") {
-                        navController.navigate("admin") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    } else if (viewModel.validarLogin()) {
-                        navController.navigate("inicio") {
-                            popUpTo("login") { inclusive = true }
+                    if (viewModel.validarLogin()) {
+                        scope.launch {
+                            val usuario = viewModel.login()
+
+                            if (usuario != null) {
+                                if (usuario.rol == "Empleado") {
+                                    navController.navigate("admin") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("inicio") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                            } else {
+                                viewModel.setError("Correo o contraseña incorrectos")
+                            }
                         }
                     }
                 },
