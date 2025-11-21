@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "vinilos")
 data class Vinilo(
-    @PrimaryKey(autoGenerate = true)
-    val idVin: Int = 0,
+    @PrimaryKey
+    val idVin: Int,
 
     val nombre: String,
     val artista: String,
