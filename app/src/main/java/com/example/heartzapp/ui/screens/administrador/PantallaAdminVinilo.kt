@@ -1,6 +1,9 @@
 package com.example.heartzapp.ui.screens.administrador
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,13 +19,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.heartzapp.data.model.Vinilo
 import com.example.heartzapp.ui.components.BotonVolver
 import com.example.heartzapp.viewmodel.ViniloAdminViewModel
@@ -34,7 +42,6 @@ fun PantallaAdminVinilo(
     navController: NavController,
     viewModel: ViniloAdminViewModel = viewModel()
 ) {
-    // --- Lógica del Estado (sin cambios) ---
     val vinilos by viewModel.vinilos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedVinilo by viewModel.selectedVinilo.collectAsState()
@@ -53,13 +60,11 @@ fun PantallaAdminVinilo(
             TopAppBar(
                 title = { Text("Administración de Vinilos", color = Color.White, fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF8E24AA)),
-                navigationIcon = {
-                    BotonVolver(navController)
-                },
+                navigationIcon = { BotonVolver(navController) },
                 actions = {
                     Button(
                         onClick = {
-                            viewModel.selectVinilo(null) // Carga un vinilo vacío para crear
+                            viewModel.selectVinilo(null)
                             isFormVisible.value = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD5B6F2)),
@@ -75,17 +80,17 @@ fun PantallaAdminVinilo(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(Color(0xFFF8F8F8))
         ) {
-            // 1. Lista de Vinilos
+
             if (isLoading) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             } else if (vinilos.isEmpty()) {
                 Text(
-                    text = "No hay vinilos en la base de datos.",
+                    "No hay vinilos en la base de datos.",
                     modifier = Modifier.align(Alignment.Center),
                     color = Color.Gray
                 )
@@ -94,19 +99,14 @@ fun PantallaAdminVinilo(
                     items(vinilos, key = { it.idVin }) { vinilo ->
                         ViniloAdminItem(
                             vinilo = vinilo,
-                            onEditClick = {
-                                viewModel.selectVinilo(it)
-                            },
-                            onDeleteClick = {
-                                viewModel.deleteVinilo(it)
-                            }
+                            onEditClick = { viewModel.selectVinilo(it) },
+                            onDeleteClick = { viewModel.deleteVinilo(it) }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(8.dp))
                     }
                 }
             }
 
-            // 2. Formulario de Edición/Creación (Modal Inferior)
             AnimatedVisibility(
                 visible = isFormVisible.value,
                 enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -131,6 +131,8 @@ fun PantallaAdminVinilo(
     }
 }
 
+
+
 @Composable
 fun ViniloAdminItem(
     vinilo: Vinilo,
@@ -138,56 +140,35 @@ fun ViniloAdminItem(
     onDeleteClick: (Vinilo) -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onEditClick(vinilo) },
+        Modifier.fillMaxWidth().clickable { onEditClick(vinilo) },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+            Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ID del Vinilo y Título
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "ID: ${vinilo.idVin}",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-                Text(
-                    text = vinilo.nombre,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFF6A1B9A)
-                )
-                Text(
-                    text = "Artista: ${vinilo.artista}",
-                    fontSize = 14.sp,
-                    color = Color.Black
-                )
-                Text(
-                    text = "Precio: $${vinilo.precio}, Stock: ${vinilo.stock}",
-                    fontSize = 14.sp,
-                    color = Color.Black
-                )
+
+            Column(Modifier.weight(1f)) {
+                Text("ID: ${vinilo.idVin}", fontSize = 12.sp, color = Color.Gray)
+                Text(vinilo.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF6A1B9A))
+                Text("Artista: ${vinilo.artista}")
+                Text("Precio: $${vinilo.precio}  Stock: ${vinilo.stock}")
             }
 
-            // Botón Editar
             IconButton(onClick = { onEditClick(vinilo) }) {
                 Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color(0xFF9C27B0))
             }
 
-            // Botón Eliminar
             IconButton(onClick = { onDeleteClick(vinilo) }) {
                 Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color(0xFFE57373))
             }
         }
     }
 }
+
+
 
 @Composable
 fun ViniloFormulario(
@@ -199,130 +180,189 @@ fun ViniloFormulario(
 ) {
     var dialogOpen by remember { mutableStateOf(false) }
 
+    var previewImage by remember { mutableStateOf(vinilo.img) }
+
+    val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            previewImage = it.toString()
+            onValueChange(vinilo.copy(img = it.toString()))
+        }
+    }
+
+    val drawableId = remember(previewImage) {
+        if (!previewImage.contains("/") && previewImage.isNotBlank()) {
+            context.resources.getIdentifier(
+                previewImage.substringBeforeLast("."),
+                "drawable",
+                context.packageName
+            )
+        } else 0
+    }
+
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
+        Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         color = Color.White,
         shadowElevation = 16.dp
     ) {
+
         Column(
-            modifier = Modifier
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
+            Modifier.padding(24.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
-                text = if (isEditing) "Editar Vinilo (ID: ${vinilo.idVin})" else "Crear Nuevo Vinilo",
+                if (isEditing) "Editar Vinilo (ID: ${vinilo.idVin})" else "Crear Nuevo Vinilo",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 16.dp),
                 color = Color(0xFF6A1B9A)
             )
 
-            // --- Formulario de Campos ---
+            Spacer(Modifier.height(16.dp))
+
+
+            Box(
+                Modifier
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF3E5F5)),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    drawableId != 0 ->
+                        Image(
+                            painter = painterResource(drawableId),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+
+                    previewImage.startsWith("content://") ||
+                            previewImage.startsWith("http") ->
+                        AsyncImage(
+                            model = previewImage,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+
+                    else ->
+                        Icon(
+                            Icons.Default.Image,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(48.dp)
+                        )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = { launcher.launch("image/*") },
+                colors = ButtonDefaults.buttonColors(Color(0xFF9C27B0)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Image, contentDescription = null, tint = Color.White)
+                Spacer(Modifier.width(6.dp))
+                Text("Seleccionar Imagen", color = Color.White)
+            }
+
+            Spacer(Modifier.height(16.dp))
+
 
             OutlinedTextField(
                 value = vinilo.nombre,
                 onValueChange = { onValueChange(vinilo.copy(nombre = it)) },
                 label = { Text("Nombre del Álbum") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
+
             OutlinedTextField(
                 value = vinilo.artista,
                 onValueChange = { onValueChange(vinilo.copy(artista = it)) },
                 label = { Text("Artista") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
-            Row(modifier = Modifier.fillMaxWidth()) {
+
+
+            Row(Modifier.fillMaxWidth()) {
+
                 OutlinedTextField(
                     value = if (vinilo.precio == 0) "" else vinilo.precio.toString(),
                     onValueChange = { onValueChange(vinilo.copy(precio = it.toIntOrNull() ?: 0)) },
-                    label = { Text("Precio ($)") },
-                    // CORRECCIÓN 1: Sustituir vertical por top y bottom.
-                    modifier = Modifier.padding(end = 8.dp, top = 4.dp, bottom = 4.dp).weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    label = { Text("Precio") },
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
                 )
+
                 OutlinedTextField(
                     value = if (vinilo.stock == 0) "" else vinilo.stock.toString(),
                     onValueChange = { onValueChange(vinilo.copy(stock = it.toIntOrNull() ?: 0)) },
                     label = { Text("Stock") },
-                    // CORRECCIÓN 2: Sustituir vertical por top y bottom.
-                    modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp).weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
                 )
             }
+
             OutlinedTextField(
                 value = vinilo.genero,
                 onValueChange = { onValueChange(vinilo.copy(genero = it)) },
                 label = { Text("Género") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = vinilo.img,
-                onValueChange = { onValueChange(vinilo.copy(img = it)) },
-                label = { Text("URL Imagen") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                singleLine = true
-            )
+
+
             OutlinedTextField(
                 value = vinilo.descripcion,
                 onValueChange = { onValueChange(vinilo.copy(descripcion = it)) },
                 label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
-            // --- Botones de Acción ---
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+
+            Row(Modifier.fillMaxWidth()) {
+
                 Button(
                     onClick = onCancel,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                    colors = ButtonDefaults.buttonColors(Color.LightGray),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Cancelar", color = Color.Black)
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+
+                Spacer(Modifier.width(14.dp))
 
                 Button(
                     onClick = {
-                        if (isEditing) {
-                            dialogOpen = true // Muestra confirmación al editar
-                        } else {
-                            onSave(vinilo) // Guarda inmediatamente al crear
-                        }
+                        if (isEditing) dialogOpen = true else onSave(vinilo)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
+                    colors = ButtonDefaults.buttonColors(Color(0xFF6A1B9A)),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(if (isEditing) "Guardar Cambios" else "Crear Vinilo")
+                    Text(if (isEditing) "Guardar" else "Crear")
                 }
             }
 
-            // Diálogo de Confirmación (solo para Edición/Actualización)
+
             if (dialogOpen) {
                 AlertDialog(
                     onDismissRequest = { dialogOpen = false },
-                    title = { Text("Confirmar Guardado") },
-                    text = { Text("¿Estás seguro de que quieres guardar los cambios en el vinilo \"${vinilo.nombre}\" (ID: ${vinilo.idVin})?") },
+                    title = { Text("Confirmar actualización") },
+                    text = { Text("¿Guardar cambios en \"${vinilo.nombre}\"?") },
                     confirmButton = {
-                        Button(
-                            onClick = {
-                                onSave(vinilo)
-                                dialogOpen = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
-                        ) {
+                        Button(onClick = {
+                            dialogOpen = false
+                            onSave(vinilo)
+                        }) {
                             Text("Confirmar")
                         }
                     },
