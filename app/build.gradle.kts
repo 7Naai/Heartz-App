@@ -101,5 +101,26 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 
+    // Tests unitarios
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")  // JUnit5
+    testImplementation("io.mockk:mockk:1.13.8")                   // MockK
+    testImplementation("io.kotest:kotest-assertions-core:5.7.2") // Kotest
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // Kotest Core + Runner
+    testImplementation("io.kotest:kotest-runner-junit5:5.7.2")
+    testImplementation("io.kotest:kotest-framework-engine:5.7.2") // opcional pero recomendado
+    // Android Tests
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(kotlin("test"))
+
 
 }
+
+    // Configuración JUnit5 para que funcione correctamente
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
