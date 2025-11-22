@@ -71,6 +71,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.navigation.testing)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -109,10 +110,18 @@ dependencies {
 
     //Mockk
     testImplementation("io.mockk:mockk:1.13.10")
+    // MockK para instrumented tests
+    androidTestImplementation("io.mockk:mockk-android:1.13.10")
+
 
     //Compose UI Test
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.2")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Coroutines Test
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
 
 // ⚠️ Obligatorio para usar JUnit 5
