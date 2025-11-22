@@ -10,29 +10,20 @@ import io.mockk.coJustRun
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UsuarioViewModelTest : StringSpec({
 
     "registrar llama al repositorio y actualiza lista" {
-        val testDispatcher = StandardTestDispatcher()
-        val testScope = TestScope(testDispatcher)
+        val dispatcher = StandardTestDispatcher()
         val mockRepo = mockk<RepositorioUsuarioApi>()
-
-        val usuario = Usuario(
-            rut = "11-1",
-            nombre = "Alan",
-            correo = "alan@mail.com",
-            contrasena = "123456",
-            rol = "Cliente"
-        )
+        val usuario = Usuario("11-1", "Alan", "alan@mail.com", "123456", "Cliente")
 
         coJustRun { mockRepo.crearUsuario(usuario) }
         coEvery { mockRepo.obtenerUsuarios() } returns listOf(usuario)
 
-        val vm = UsuarioViewModel(mockRepo, testDispatcher)
+        val vm = UsuarioViewModel(mockRepo, dispatcher)
 
         vm.onRutChange(usuario.rut)
         vm.onNombreChange(usuario.nombre)
@@ -40,7 +31,7 @@ class UsuarioViewModelTest : StringSpec({
         vm.onContrasenaChange(usuario.contrasena)
         vm.onAceptarTerminosChange(true)
 
-        testScope.runTest {
+        runTest(dispatcher) {
             val resultado = vm.registrar()
             resultado shouldBe true
             vm.usuarios.value shouldContain usuario
@@ -142,7 +133,7 @@ class UsuarioViewModelTest : StringSpec({
 
         val vm = UsuarioViewModel(mockRepo, StandardTestDispatcher())
         runTest {
-            vm.cargarUsuarios() // No debe lanzar excepción
+            vm.cargarUsuarios()
             vm.usuarios.value shouldBe emptyList()
         }
     }
@@ -215,4 +206,5 @@ class UsuarioViewModelTest : StringSpec({
             result shouldBe usuario
         }
     }
+
 })
