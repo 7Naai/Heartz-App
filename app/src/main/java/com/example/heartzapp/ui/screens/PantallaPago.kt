@@ -1,6 +1,10 @@
 package com.example.heartzapp.ui.screens
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Application
+import android.location.Geocoder
+import android.os.Looper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,8 +21,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.heartzapp.viewmodel.CarritoViewModel
+import com.google.android.gms.location.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,11 +33,8 @@ fun PantallaPago(
     navController: NavHostController,
     carritoVM: CarritoViewModel
 ) {
+    val context = LocalContext.current
     val carritoTotal by carritoVM.total.collectAsState()
-
-    val nombreUsuario = "Luis Fernández"
-    val correoUsuario = "cliente@heartz.cl"
-    val rutUsuario = "18.345.678-9"
 
     var direccion by remember { mutableStateOf(TextFieldValue("")) }
     var comuna by remember { mutableStateOf(TextFieldValue("")) }
@@ -39,7 +43,58 @@ fun PantallaPago(
     var expanded by remember { mutableStateOf(false) }
     var selectedRegion by remember { mutableStateOf(regiones[0]) }
 
-    val headerColor = Color(0xFF2A004E)
+    val fusedLocation = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    @SuppressLint("MissingPermission")
+    fun obtenerUbicacion() {
+        val permisos = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+
+        if (!permisos.all {
+                ActivityCompat.checkSelfPermission(context, it) ==
+                        android.content.pm.PackageManager.PERMISSION_GRANTED
+            }
+        ) {
+            ActivityCompat.requestPermissions(
+                (context as android.app.Activity),
+                permisos,
+                1001
+            )
+            return
+        }
+
+        val request = LocationRequest.Builder(1000)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .setWaitForAccurateLocation(true)
+            .build()
+
+        fusedLocation.requestLocationUpdates(
+            request,
+            object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    val loc = result.lastLocation ?: return
+                    fusedLocation.removeLocationUpdates(this)
+
+                    val geocoder = Geocoder(context)
+                    val info = geocoder.getFromLocation(loc.latitude, loc.longitude, 1)
+
+                    if (!info.isNullOrEmpty()) {
+                        val dir = info[0].thoroughfare ?: ""
+                        val num = info[0].subThoroughfare ?: ""
+                        val comunaTxt = info[0].locality ?: ""
+                        val regionTxt = info[0].adminArea ?: regiones[0]
+
+                        direccion = TextFieldValue("$dir $num")
+                        comuna = TextFieldValue(comunaTxt)
+                        if (regionTxt in regiones) selectedRegion = regionTxt
+                    }
+                }
+            },
+            Looper.getMainLooper()
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -54,7 +109,7 @@ fun PantallaPago(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = headerColor)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF2A004E))
             )
         }
     ) { paddingValues ->
@@ -68,14 +123,12 @@ fun PantallaPago(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF4A148C)),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-
                     Text(
                         text = "Resumen del Pedido",
                         style = MaterialTheme.typography.titleLarge.copy(
@@ -83,9 +136,7 @@ fun PantallaPago(
                             fontWeight = FontWeight.Bold
                         )
                     )
-
                     Spacer(Modifier.height(16.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -109,7 +160,6 @@ fun PantallaPago(
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-
                     Text(
                         "Información del Cliente y Envío",
                         fontWeight = FontWeight.Bold,
@@ -117,47 +167,33 @@ fun PantallaPago(
                     )
 
                     OutlinedTextField(
-                        value = nombreUsuario,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Nombre Completo") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = correoUsuario,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Correo Electrónico") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = rutUsuario,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("RUT / Identificación") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                    )
-
-                    OutlinedTextField(
                         value = direccion,
                         onValueChange = { direccion = it },
                         label = { Text("Dirección") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                        modifier = Modifier.fillMaxWidth()
                     )
+
+                    Button(
+                        onClick = { obtenerUbicacion() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        colors = ButtonDefaults.buttonColors(Color(0xFF6A1B9A))
+                    ) {
+                        Text("Usar mi ubicación", color = Color.White)
+                    }
 
                     OutlinedTextField(
                         value = comuna,
                         onValueChange = { comuna = it },
                         label = { Text("Comuna") },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                     )
 
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                     ) {
                         OutlinedTextField(
                             readOnly = true,
