@@ -33,8 +33,11 @@ fun TarjetaVinilo(
 ) {
     val context = LocalContext.current
 
+    // 🔥 Quitar ".jpg" o ".png" del nombre
+    val nombreSinExtension = vinilo.img.substringBeforeLast(".")
+
     val imageResId = context.resources.getIdentifier(
-        vinilo.img,
+        nombreSinExtension,
         "drawable",
         context.packageName
     )
@@ -55,6 +58,7 @@ fun TarjetaVinilo(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             if (imageResId != 0) {
                 Image(
                     painter = painterResource(id = imageResId),
@@ -66,6 +70,7 @@ fun TarjetaVinilo(
                     contentScale = ContentScale.Crop
                 )
             } else {
+                // 🔥 fallback si falla (debug)
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -74,8 +79,8 @@ fun TarjetaVinilo(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "imagen vinilo",
-                        style = MaterialTheme.typography.headlineLarge
+                        text = "Sin img",
+                        color = Color.White
                     )
                 }
             }
@@ -126,11 +131,7 @@ fun TarjetaVinilo(
                         containerColor = Color(0xFF6A1B9A)
                     )
                 ) {
-                    Text(
-                        text = "Ver",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
-                    )
+                    Text("Ver", color = Color.White)
                 }
 
                 Button(
@@ -140,14 +141,11 @@ fun TarjetaVinilo(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFB388FF),
                         disabledContainerColor = Color.Gray
-                    ),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+                    )
                 ) {
                     Text(
-                        text = if (vinilo.stock > 0) "Añadir" else "Agotado",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (vinilo.stock > 0) Color.White else Color.LightGray,
-                        maxLines = 1
+                        if (vinilo.stock > 0) "Añadir" else "Agotado",
+                        color = if (vinilo.stock > 0) Color.White else Color.LightGray
                     )
                 }
             }
