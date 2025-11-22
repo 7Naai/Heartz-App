@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.heartzapp.data.api.RepositorioUsuarioApi
 import com.example.heartzapp.data.model.Usuario
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class UsuarioViewModel(
-    private val repository: RepositorioUsuarioApi
+    private val repository: RepositorioUsuarioApi,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
     // ------------------ CAMPOS DEL FORMULARIO ------------------
@@ -42,7 +45,7 @@ class UsuarioViewModel(
     }
 
     fun cargarUsuarios() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             try {
                 _usuarios.value = repository.obtenerUsuarios()
             } catch (e: Exception) {
