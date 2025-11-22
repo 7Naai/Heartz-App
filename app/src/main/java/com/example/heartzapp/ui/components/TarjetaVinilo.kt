@@ -5,12 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,20 +19,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.heartzapp.data.model.Vinilo
+import com.example.heartzapp.viewmodel.CarritoViewModel
 
 @Composable
 fun TarjetaVinilo(
     vinilo: Vinilo,
-    onVerDetalle: (Vinilo) -> Unit = {},
-    onAgregarCarrito: (Vinilo) -> Unit = {}
+    carritoVM: CarritoViewModel,
+    onVerDetalle: (Vinilo) -> Unit = {}
 ) {
     val context = LocalContext.current
 
-    // 🔥 Quitar ".jpg" o ".png" del nombre
-    val nombreSinExtension = vinilo.img.substringBeforeLast(".")
+    val nombreSinExt = vinilo.img.substringBeforeLast(".")
 
     val imageResId = context.resources.getIdentifier(
-        nombreSinExtension,
+        nombreSinExt,
         "drawable",
         context.packageName
     )
@@ -59,6 +54,7 @@ fun TarjetaVinilo(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // 📸 Imagen
             if (imageResId != 0) {
                 Image(
                     painter = painterResource(id = imageResId),
@@ -70,7 +66,6 @@ fun TarjetaVinilo(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // 🔥 fallback si falla (debug)
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -78,15 +73,13 @@ fun TarjetaVinilo(
                         .clickable { onVerDetalle(vinilo) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Sin img",
-                        color = Color.White
-                    )
+                    Text("Sin img", color = Color.White)
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // 🔤 Nombre
             Text(
                 text = vinilo.nombre,
                 style = MaterialTheme.typography.titleSmall.copy(
@@ -99,6 +92,7 @@ fun TarjetaVinilo(
                 modifier = Modifier.clickable { onVerDetalle(vinilo) }
             )
 
+            // Artista
             Text(
                 text = vinilo.artista,
                 style = MaterialTheme.typography.bodySmall.copy(
@@ -110,6 +104,7 @@ fun TarjetaVinilo(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // 💵 Precio
             Text(
                 text = "$${"%,d".format(vinilo.precio)}",
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -124,6 +119,7 @@ fun TarjetaVinilo(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // Botón VER
                 Button(
                     onClick = { onVerDetalle(vinilo) },
                     modifier = Modifier.weight(1f),
@@ -134,8 +130,9 @@ fun TarjetaVinilo(
                     Text("Ver", color = Color.White)
                 }
 
+                // Botón AÑADIR AL CARRITO
                 Button(
-                    onClick = { onAgregarCarrito(vinilo) },
+                    onClick = { carritoVM.agregar(vinilo) },
                     modifier = Modifier.weight(1f),
                     enabled = vinilo.stock > 0,
                     colors = ButtonDefaults.buttonColors(

@@ -15,17 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.heartzapp.viewmodel.ViniloViewModel
+import com.example.heartzapp.viewmodel.CarritoViewModel
 
 @Composable
 fun PantallaBoleta(
     navController: NavController,
-    viewModel: ViniloViewModel
+    carritoVM: CarritoViewModel
 ) {
-    val carritoItems by viewModel.carritoItems.collectAsState()
-    val carritoTotal by viewModel.carritoTotal.collectAsState()
+    val carritoItems by carritoVM.items.collectAsState()
+    val carritoTotal by carritoVM.total.collectAsState()
 
-    // Número de boleta fijo
     val numeroBoleta = "#4AG4GRCC"
 
     Box(
@@ -34,42 +33,39 @@ fun PantallaBoleta(
             .background(Color(0xFFF8F8F8)),
         contentAlignment = Alignment.Center
     ) {
+
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(16.dp)
                 .border(1.dp, Color.LightGray),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            colors = CardDefaults.cardColors(Color.White),
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
+
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
+                modifier = Modifier.padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Text(
-                    text = "HEARTZ - Boleta de Compra",
+                    "HEARTZ - Boleta de Compra",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
                         fontFamily = FontFamily.Monospace
                     )
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
-                    text = numeroBoleta,
+                    numeroBoleta,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.DarkGray,
                         fontFamily = FontFamily.Monospace
                     )
                 )
 
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                Divider(Modifier.padding(vertical = 12.dp))
 
-                // Lista de productos
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -84,69 +80,54 @@ fun PantallaBoleta(
                         ) {
                             Column {
                                 Text(
-                                    text = item.nombre,
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    item.nombre,
+                                    fontWeight = FontWeight.Bold
                                 )
-                                Text(
-                                    text = "x${item.cantidad}",
-                                    style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
-                                )
+                                Text("x${item.cantidad}", color = Color.Gray)
                             }
                             Text(
-                                text = "$${"%,d".format(item.precio * item.cantidad)}",
-                                style = MaterialTheme.typography.bodyLarge
+                                "$${"%,d".format(item.precio * item.cantidad)}"
                             )
                         }
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                Divider(Modifier.padding(vertical = 12.dp))
 
-                // Total
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    Text("TOTAL", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Text(
-                        text = "TOTAL",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = "$${"%,d".format(carritoTotal)}",
+                        "$${"%,d".format(carritoTotal)}",
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 18.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(Modifier.height(20.dp))
 
                 Text(
-                    text = "Gracias por tu compra ❤️",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = Color.Gray,
-                        fontFamily = FontFamily.Monospace
-                    )
+                    "Gracias por tu compra ❤️",
+                    color = Color.Gray,
+                    fontFamily = FontFamily.Monospace
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Button(
                     onClick = {
-                        viewModel.vaciarCarrito()
+                        carritoVM.vaciar()
                         navController.navigate("inicio") {
                             popUpTo("inicio") { inclusive = true }
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(Color(0xFF8E24AA))
                 ) {
                     Text(
-                        text = "Volver al Inicio",
+                        "Volver al Inicio",
                         style = MaterialTheme.typography.titleMedium.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold

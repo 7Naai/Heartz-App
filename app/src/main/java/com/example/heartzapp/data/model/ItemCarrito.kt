@@ -17,11 +17,10 @@ import androidx.room.PrimaryKey
     ]
 )
 data class ItemCarrito(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val viniloId: Int, // Referencia al Vinilo
+    val id: Int? = null,
+    val viniloId: Int,
     val nombre: String,
     val precio: Int,
     val img: String,
-    val cantidad: Int = 1 // Cantidad de este vinilo en el carrito
+    val cantidad: Int = 1
 )

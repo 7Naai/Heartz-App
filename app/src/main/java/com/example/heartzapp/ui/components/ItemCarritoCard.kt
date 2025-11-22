@@ -29,8 +29,9 @@ fun ItemCarritoCard(
 ) {
     val context = LocalContext.current
 
+    val nombreSinExt = item.img.substringBeforeLast(".")
     val imageResId = context.resources.getIdentifier(
-        item.img,
+        nombreSinExt,
         "drawable",
         context.packageName
     )
@@ -49,7 +50,7 @@ fun ItemCarritoCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen del Vinilo
+
             if (imageResId != 0) {
                 Image(
                     painter = painterResource(id = imageResId),
@@ -66,13 +67,12 @@ fun ItemCarritoCard(
                         .background(Color(0xFF4A148C), RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "💿", style = MaterialTheme.typography.titleLarge)
+                    Text("💿")
                 }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Nombre y Precio
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -93,21 +93,19 @@ fun ItemCarritoCard(
                 )
             }
 
-            // Controles de Cantidad
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 IconButton(
                     onClick = { onDecrement(item) },
-                    enabled = item.cantidad > 0,
+                    enabled = item.cantidad > 1,
                     colors = IconButtonDefaults.iconButtonColors(
                         contentColor = Color.White,
                         containerColor = Color(0xFF6A1B9A)
                     )
                 ) {
-                    // USO DEL ÍCONO 'REMOVE'
-                    Icon(Icons.Default.Remove, contentDescription = "Quitar uno")
+                    Icon(Icons.Default.Remove, contentDescription = null)
                 }
 
                 Text(
@@ -124,8 +122,7 @@ fun ItemCarritoCard(
                         containerColor = Color(0xFF9C27B0)
                     )
                 ) {
-                    // USO DEL ÍCONO 'ADD'
-                    Icon(Icons.Default.Add, contentDescription = "Agregar uno")
+                    Icon(Icons.Default.Add, contentDescription = null)
                 }
             }
         }

@@ -1,22 +1,17 @@
 package com.example.heartzapp.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -25,30 +20,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.heartzapp.data.model.Vinilo
 import com.example.heartzapp.ui.components.BottomBar
 import com.example.heartzapp.ui.components.CarruselImagenes
 import com.example.heartzapp.ui.components.TarjetaVinilo
+import com.example.heartzapp.viewmodel.CarritoViewModel
 import com.example.heartzapp.viewmodel.ViniloViewModel
 
-
 @Composable
-fun PantallaInicio(navController: NavHostController) {
+fun PantallaInicio(navController: NavHostController, carritoVM: CarritoViewModel) {
+
     val context = LocalContext.current
-    val viewModel: ViniloViewModel = viewModel(
-        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(
-            context.applicationContext as android.app.Application
-        )
+
+    val viniloVM: ViniloViewModel = viewModel(
+        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
+            .getInstance(context.applicationContext as Application)
     )
-    val vinilos by viewModel.vinilos.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+
+    val vinilos by viniloVM.vinilos.collectAsState()
+    val isLoading by viniloVM.isLoading.collectAsState()
 
     val productosDestacados = vinilos.take(4)
-
-    val proximosLanzamientos = listOf(
-        Pair("Próximo lanzamiento 1", "Próximamente"),
-        Pair("Próximo lanzamiento 2", "Próximamente")
-    )
 
     Scaffold(
         topBar = {
@@ -67,17 +58,16 @@ fun PantallaInicio(navController: NavHostController) {
                 )
             }
         },
-        bottomBar = {
-            BottomBar(navController)
-        }
+        bottomBar = { BottomBar(navController) }
     ) { paddingValues ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(
+                        listOf(
                             Color(0xFF7E57C2),
                             Color(0xFFF3E5F5)
                         )
@@ -89,15 +79,13 @@ fun PantallaInicio(navController: NavHostController) {
                     .fillMaxSize()
                     .padding(horizontal = 12.dp)
             ) {
-                CarruselImagenes()
 
+                CarruselImagenes()
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Productos destacados",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = Color.White
-                    ),
+                    style = MaterialTheme.typography.titleLarge.copy(color = Color.White),
                     modifier = Modifier.padding(start = 4.dp)
                 )
 
@@ -105,14 +93,19 @@ fun PantallaInicio(navController: NavHostController) {
 
                 if (isLoading) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(300.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = Color.White)
                     }
-                } else if (productosDestacados.isEmpty()) {
+                }
+                else if (productosDestacados.isEmpty()) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(300.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -122,7 +115,8 @@ fun PantallaInicio(navController: NavHostController) {
                             textAlign = TextAlign.Center
                         )
                     }
-                } else {
+                }
+                else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         modifier = Modifier
@@ -131,31 +125,18 @@ fun PantallaInicio(navController: NavHostController) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
                         items(productosDestacados) { vinilo ->
                             TarjetaVinilo(
                                 vinilo = vinilo,
-                                onVerDetalle = { viniloSeleccionado ->
-                                    navController.navigate("detalle/${viniloSeleccionado.idVin.toString()}")
-                                },
-                                onAgregarCarrito = { viniloSeleccionado ->
-                                    viewModel.agregarViniloACarrito(viniloSeleccionado)
+                                carritoVM = carritoVM,
+                                onVerDetalle = {
+                                    navController.navigate("detalle/${vinilo.idVin}")
                                 }
                             )
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Próximas novedades",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = Color.White
-                    ),
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -164,7 +145,7 @@ fun PantallaInicio(navController: NavHostController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Button(onClick = { navController.navigate("productos") }) {
-                        Text(text = "Consultar catálogo completo")
+                        Text("Consultar catálogo completo")
                     }
                 }
             }

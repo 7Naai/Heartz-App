@@ -1,5 +1,6 @@
 package com.example.heartzapp.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,21 +17,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.heartzapp.ui.components.BottomBar
-import com.example.heartzapp.viewmodel.ViniloViewModel
+import com.example.heartzapp.viewmodel.CarritoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaPago(navController: NavHostController) {
-    val context = LocalContext.current
-    val viewModel: ViniloViewModel = viewModel(
-        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(
-            context.applicationContext as android.app.Application
-        )
-    )
-    val carritoTotal by viewModel.carritoTotal.collectAsState()
+fun PantallaPago(
+    navController: NavHostController,
+    carritoVM: CarritoViewModel
+) {
+    val carritoTotal by carritoVM.total.collectAsState()
 
     val nombreUsuario = "Luis Fernández"
     val correoUsuario = "cliente@heartz.cl"
@@ -60,11 +56,9 @@ fun PantallaPago(navController: NavHostController) {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = headerColor)
             )
-        },
-        bottomBar = {
-            BottomBar(navController)
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,104 +70,101 @@ fun PantallaPago(navController: NavHostController) {
         ) {
 
             Card(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF4A148C)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
+
                     Text(
                         text = "Resumen del Pedido",
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        )
                     )
+
+                    Spacer(Modifier.height(16.dp))
+
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Text("Total a Pagar:", color = Color.White)
                         Text(
-                            text = "Total a Pagar:",
-                            style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)
-                        )
-                        Text(
-                            text = "$${"%,d".format(carritoTotal)}",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                color = Color(0xFFB388FF),
-                                fontWeight = FontWeight.ExtraBold
-                            )
+                            "$${"%,d".format(carritoTotal)}",
+                            color = Color(0xFFB388FF),
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
 
-            // CARD: Formulario de Datos del Cliente y Envío
+            Spacer(Modifier.height(16.dp))
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
+
                     Text(
-                        text = "Información del Cliente y Envío",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        "Información del Cliente y Envío",
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // === DATOS PRE-RELLENADOS ===
                     OutlinedTextField(
                         value = nombreUsuario,
                         onValueChange = {},
-                        label = { Text("Nombre Completo") },
                         readOnly = true,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        label = { Text("Nombre Completo") },
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = correoUsuario,
                         onValueChange = {},
-                        label = { Text("Correo Electrónico") },
                         readOnly = true,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        label = { Text("Correo Electrónico") },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
 
                     OutlinedTextField(
                         value = rutUsuario,
                         onValueChange = {},
-                        label = { Text("RUT/Identificación") },
                         readOnly = true,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                    )
-
-
-                    OutlinedTextField(
-                        value = direccion.text,
-                        onValueChange = { direccion = TextFieldValue(it) },
-                        label = { Text("Dirección (Calle y Número)") },
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        label = { Text("RUT / Identificación") },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
 
                     OutlinedTextField(
-                        value = comuna.text,
-                        onValueChange = { comuna = TextFieldValue(it) },
+                        value = direccion,
+                        onValueChange = { direccion = it },
+                        label = { Text("Dirección") },
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = comuna,
+                        onValueChange = { comuna = it },
                         label = { Text("Comuna") },
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
 
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     ) {
                         OutlinedTextField(
                             readOnly = true,
                             value = selectedRegion,
-                            onValueChange = { },
+                            onValueChange = {},
                             label = { Text("Región") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                             modifier = Modifier.menuAnchor().fillMaxWidth()
                         )
                         ExposedDropdownMenu(
@@ -192,13 +183,12 @@ fun PantallaPago(navController: NavHostController) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(Modifier.height(24.dp))
 
                     Button(
                         onClick = {
-                            println("Pago realizado. Enviando a boleta...")
                             navController.navigate("boleta") {
-                                popUpTo("pago") { inclusive = true } // Borra la pantalla de pago del stack
+                                popUpTo("pago") { inclusive = true }
                             }
                         },
                         enabled = carritoTotal > 0 &&
@@ -207,10 +197,7 @@ fun PantallaPago(navController: NavHostController) {
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9C27B0))
                     ) {
-                        Text(
-                            "Confirmar Datos y Pagar $${"%,d".format(carritoTotal)}",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
+                        Text("Confirmar y Pagar $${"%,d".format(carritoTotal)}")
                     }
                 }
             }
