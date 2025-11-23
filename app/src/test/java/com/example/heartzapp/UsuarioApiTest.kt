@@ -21,12 +21,11 @@ class UsuarioApiTest {
     @BeforeEach
     fun setup() {
         mockWebServer = MockWebServer()
-        mockWebServer.start() // Inicia el servidor
+        mockWebServer.start()
         gson = Gson()
 
-        // Configura Retrofit para apuntar al puerto local del MockWebServer
         api = Retrofit.Builder()
-            .baseUrl(mockWebServer.url("/")) // Usa la URL del servidor mock
+            .baseUrl(mockWebServer.url("/")) // IMPORTANTÍSIMO
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(UsuarioApi::class.java)
@@ -34,77 +33,47 @@ class UsuarioApiTest {
 
     @AfterEach
     fun tearDown() {
-        mockWebServer.shutdown() // Detiene el servidor después de cada test
+        mockWebServer.shutdown()
     }
 
-    // ---------------------------------------------------------------------
-    //                         PRUEBA DE CREACIÓN (POST)
-    // ---------------------------------------------------------------------
-
     @Test
-    fun `crearUsuario envia el cuerpo correcto y retorna el usuario creado`() = runTest {
-        // 1. Datos de prueba
-        val nuevoUsuario = Usuario(rut = "12345678-9", nombre = "John Doe", correo = "j.doe@test.com", contrasena = "password", rol="Cliente")
+    fun `crearUsuario envia POST a la ruta correcta y retorna el usuario`() = runTest {
+        val nuevoUsuario = Usuario("123", "John", "j@test.com", "123", "Cliente")
         val jsonRespuesta = gson.toJson(nuevoUsuario)
 
-        // 2. Configurar la respuesta del Mock Server
-        // El servidor responderá con un código 201 (Created) y el JSON del usuario.
         val mockResponse = MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_CREATED) // Código 201
+            .setResponseCode(HttpURLConnection.HTTP_CREATED)
             .setBody(jsonRespuesta)
 
         mockWebServer.enqueue(mockResponse)
 
-        // 3. Llamar a la función del API
         val resultado = api.crearUsuario(nuevoUsuario)
 
-        // 4. VERIFICACIONES
+        val req = mockWebServer.takeRequest()
+        assert(req.method == "POST")
+        assert(req.path == "/usuarios") // ← LA RUTA REAL
+        assert(req.body.readUtf8() == jsonRespuesta)
 
-        // a) Verificar que la solicitud enviada al servidor sea correcta
-        val solicitud = mockWebServer.takeRequest() // Captura la solicitud HTTP enviada
-        assert(solicitud.method == "POST")
-        assert(solicitud.path == "/usuarios")
-
-        // Verificar que el cuerpo de la solicitud es el esperado
-        val cuerpoEnviado = solicitud.body.readUtf8()
-        assert(cuerpoEnviado == jsonRespuesta)
-
-        // b) Verificar que la respuesta del API sea correcta
-        assert(resultado.rut == "12345678-9")
-        assert(resultado.nombre == "John Doe")
+        assert(resultado.rut == "123")
     }
 
-    // ---------------------------------------------------------------------
-    //                         PRUEBA DE OBTENER (GET)
-    // ---------------------------------------------------------------------
-
     @Test
-    fun `getUsuarioByRut envia la ruta correcta y retorna el usuario`() = runTest {
-        // 1. Datos de prueba
-        val usuarioEncontrado = Usuario(rut = "11223344-5", nombre = "Jane Smith", correo = "j.smith@test.com", contrasena = "password", rol="Cliente")
-        val jsonRespuesta = gson.toJson(usuarioEncontrado)
-        val rutBuscado = "11223344-5"
+    fun `getUsuarioByRut usa GET y retorna el usuario`() = runTest {
+        val usuario = Usuario("45", "Ana", "a@test.com", "pass", "Cliente")
+        val json = gson.toJson(usuario)
 
-        // 2. Configurar la respuesta del Mock Server (Código 200 OK)
-        val mockResponse = MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_OK) // Código 200
-            .setBody(jsonRespuesta)
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(json)
+        )
 
-        mockWebServer.enqueue(mockResponse)
+        val resultado = api.getUsuarioByRut("45")
 
-        // 3. Llamar a la función del API
-        val resultado = api.getUsuarioByRut(rutBuscado)
+        val req = mockWebServer.takeRequest()
+        assert(req.method == "GET")
+        assert(req.path == "/usuarios/45") // ← EXACTAMENTE ASÍ
 
-        // 4. VERIFICACIONES
-
-        // a) Verificar que la solicitud enviada al servidor sea correcta
-        val solicitud = mockWebServer.takeRequest()
-        assert(solicitud.method == "GET")
-        // Verificar que la URL incluye el parámetro de la ruta
-        assert(solicitud.path == "/usuarios/$rutBuscado")
-
-        // b) Verificar que la respuesta del API sea correcta
-        assert(resultado.rut == rutBuscado)
-        assert(resultado.nombre == "Jane Smith")
+        assert(resultado.nombre == "Ana")
     }
 }

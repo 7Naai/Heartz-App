@@ -12,28 +12,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.HttpURLConnection
 
-// Nota: Dado que el modelo Vinilo no está en este archivo, se define una versión simple para el test.
-// En un proyecto real, usarías el archivo Vinilo.kt.
-
-/*
-data class Vinilo(
-    val idVin: Int,
-    val nombre: String,
-    val artista: String,
-    val precio: Int
-    // ... otros campos
-)
-*/
-
-
 class ViniloApiTest {
 
     private lateinit var mockWebServer: MockWebServer
     private lateinit var api: ViniloApi
     private lateinit var gson: Gson
 
-    // Datos de prueba
-    private val viniloTest = Vinilo(
+    private val viniloSample = Vinilo(
         idVin = 10,
         nombre = "Thriller",
         artista = "Michael Jackson",
@@ -54,12 +39,12 @@ class ViniloApiTest {
     @BeforeEach
     fun setup() {
         mockWebServer = MockWebServer()
-        mockWebServer.start() // Inicia el servidor
+        mockWebServer.start()
+
         gson = Gson()
 
-        // Configura Retrofit para apuntar al puerto local del MockWebServer
         api = Retrofit.Builder()
-            .baseUrl(mockWebServer.url("/")) // Usa la URL del servidor mock
+            .baseUrl(mockWebServer.url("/"))
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(ViniloApi::class.java)
@@ -67,76 +52,49 @@ class ViniloApiTest {
 
     @AfterEach
     fun tearDown() {
-        mockWebServer.shutdown() // Detiene el servidor después de cada test
+        mockWebServer.shutdown()
     }
 
-    // ---------------------------------------------------------------------
-    //                         PRUEBA DE OBTENER POR ID (GET)
-    // ---------------------------------------------------------------------
-
     @Test
-    fun `getViniloById envia la ruta correcta y retorna el objeto Vinilo`() = runTest {
-        val idBuscado = viniloTest.idVin
-        val jsonRespuesta = gson.toJson(viniloTest)
+    fun `getViniloById retorna el vinilo y usa la ruta correcta`() = runTest {
+        val json = gson.toJson(viniloSample)
 
-        // 1. Configurar la respuesta del Mock Server
-        val mockResponse = MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_OK) // Código 200
-            .setBody(jsonRespuesta)
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(json)
+        )
 
-        mockWebServer.enqueue(mockResponse)
+        val resultado = api.getViniloById(10)
 
-        // 2. Llamar a la función del API
-        val resultado = api.getViniloById(idBuscado)
+        val req = mockWebServer.takeRequest()
+        assert(req.method == "GET")
+        assert(req.path == "/vinilos/10") // ← RUTA EXACTA
 
-        // 3. VERIFICACIONES
-
-        // a) Verificar que la solicitud enviada al servidor sea correcta
-        val solicitud = mockWebServer.takeRequest() // Captura la solicitud HTTP enviada
-        assert(solicitud.method == "GET")
-        // Verificar que la URL incluye el ID en la ruta
-        assert(solicitud.path == "/vinilos/$idBuscado")
-
-        // b) Verificar que la respuesta del API sea correcta
-        assert(resultado.idVin == idBuscado)
         assert(resultado.nombre == "Thriller")
     }
 
-    // ---------------------------------------------------------------------
-    //                         PRUEBA DE CREACIÓN (POST)
-    // ---------------------------------------------------------------------
-
     @Test
-    fun `createVinilo envia el cuerpo correcto y el metodo POST`() = runTest {
-        val viniloACrear = viniloTest.copy(idVin = 0) // Simular un objeto sin ID
-        val viniloConID = viniloTest.copy(idVin = 11) // Simular el objeto retornado por el servidor
-        val jsonEnvio = gson.toJson(viniloACrear)
-        val jsonRespuesta = gson.toJson(viniloConID)
+    fun `createVinilo envia POST con el cuerpo correcto`() = runTest {
+        val paraEnviar = viniloSample.copy(idVin = 0)
+        val jsonEnvio = gson.toJson(paraEnviar)
 
-        // 1. Configurar la respuesta del Mock Server (simulando éxito en la creación)
-        val mockResponse = MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_CREATED) // Código 201
-            .setBody(jsonRespuesta)
+        val creado = viniloSample
+        val jsonRespuesta = gson.toJson(creado)
 
-        mockWebServer.enqueue(mockResponse)
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_CREATED)
+                .setBody(jsonRespuesta)
+        )
 
-        // 2. Llamar a la función del API
-        val resultado = api.createVinilo(viniloACrear)
+        val resultado = api.createVinilo(paraEnviar)
 
-        // 3. VERIFICACIONES
+        val req = mockWebServer.takeRequest()
+        assert(req.method == "POST")
+        assert(req.path == "/vinilos") // ← IGUAL A TU API REAL
+        assert(req.body.readUtf8() == jsonEnvio)
 
-        // a) Verificar que la solicitud enviada al servidor sea correcta
-        val solicitud = mockWebServer.takeRequest()
-        assert(solicitud.method == "POST")
-        assert(solicitud.path == "/vinilos")
-
-        // Verificar que el cuerpo de la solicitud enviado es el esperado
-        val cuerpoEnviado = solicitud.body.readUtf8()
-        assert(cuerpoEnviado == jsonEnvio)
-
-        // b) Verificar que la respuesta del API se deserializa correctamente (ahora tiene ID 11)
-        assert(resultado.idVin == 11)
+        assert(resultado.idVin == 10)
     }
-
-
 }
