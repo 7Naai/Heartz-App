@@ -117,6 +117,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(kotlin("test"))
 
+    // MockWebServer de Square (para simular el backend)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 
 }
 
