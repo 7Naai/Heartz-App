@@ -56,3 +56,8 @@
     - Puerto del servidor
 3. Ejecutar el microservicio
 4. Verificar que los en
+
+## 5. Captura del PAK firmado y .jks
+
+- Url del tablero Trello: https://trello.com/b/trpHWEhr/desarrollo-de-aplicaciones-moviles
+- Url del repositorio Github: https://github.com/7Naai/Heartz-App
