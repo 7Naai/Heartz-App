@@ -58,6 +58,24 @@
 4. Verificar que los en
 
 ## 5. Captura del APK firmado y .jks
+<img width="511" height="597" alt="apk_firmado" src="https://github.com/user-attachments/assets/c2b2a3c4-4f82-44cf-92e6-92abde65d6f2" />
+<img width="1567" height="705" alt="commit_firmado" src="https://github.com/user-attachments/assets/95556077-46b6-492f-8f79-0a1edd8b7965" />
+
 
 - Url del tablero Trello: https://trello.com/b/trpHWEhr/desarrollo-de-aplicaciones-moviles
 - Url del repositorio Github: https://github.com/7Naai/Heartz-App
+
+## Trello
+
+<img width="1597" height="764" alt="tablero_trello" src="https://github.com/user-attachments/assets/040dc879-3a9b-43c0-8677-4a45ddf55000" />
+
+## Commits Github
+
+- Alan Fuentes
+<img width="1035" height="743" alt="commits_alan" src="https://github.com/user-attachments/assets/4c2b238f-a50c-420a-8566-bbc8de6f9e2a" />
+
+- Ian Gomez
+<img width="1048" height="712" alt="commits_ian" src="https://github.com/user-attachments/assets/fc047a49-2190-4ec1-9592-7f917dd53e50" />
+<img width="1069" height="525" alt="commit_ian_api" src="https://github.com/user-attachments/assets/ad1fe55f-8e10-4ce6-8001-5548bdf18aaf" />
+
+
