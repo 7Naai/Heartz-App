@@ -55,7 +55,7 @@
     - URL de la base de datos
     - Puerto del servidor
 3. Ejecutar el microservicio
-4. Verificar que los en
+4. Verificar que los endpoints funcionen
 
 ## 5. Captura del APK firmado y .jks
 <img width="511" height="597" alt="apk_firmado" src="https://github.com/user-attachments/assets/c2b2a3c4-4f82-44cf-92e6-92abde65d6f2" />
